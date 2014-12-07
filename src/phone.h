@@ -7,9 +7,6 @@ namespace WhatsAcppi {
 		public:
 			Phone(
 				const std::string& phoneNumber,
-				const std::string& carrier = std::string(),
-				const std::string& iso3166 = std::string(),
-				const std::string& iso639 = std::string()
 			);
 
 			~Phone();
@@ -25,12 +22,12 @@ namespace WhatsAcppi {
 			const std::string& getIso639() const;
 			const std::string& getMnc() const;
 
+			void guessPhoneInformation(const std::string& carrier = std::string());
+
 			// TODO: add setters (to avoid automatic recongnition)
 
 		protected:
-			bool isPhoneDisect;
 			std::string phoneNumber;
-			std::string carrier;
 			std::string iso3166;
 			std::string iso639;
 			std::string country;
@@ -40,7 +37,7 @@ namespace WhatsAcppi {
 			std::string phone;
 
 			void dissectPhone();
-			void detectMnc();
+			void detectMnc(const std::string& carrier = std::string());
 	};
 }
 #endif
