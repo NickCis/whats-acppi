@@ -8,6 +8,8 @@ namespace WhatsAcppi {
 			Phone(
 				const std::string& phoneNumber
 			);
+			Phone(const Phone& p);
+			Phone& operator=(const Phone& p);
 
 			~Phone();
 
