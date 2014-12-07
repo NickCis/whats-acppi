@@ -4,10 +4,7 @@
 using WhatsAcppi::Phone;
 using std::string;
 
-Phone::Phone(
-	const string& p,
-) :
-	phoneNumber(p)
+Phone::Phone(const string& p) : phoneNumber(p){
 }
 
 Phone::~Phone(){

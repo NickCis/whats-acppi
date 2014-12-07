@@ -6,7 +6,7 @@ namespace WhatsAcppi {
 	class Phone {
 		public:
 			Phone(
-				const std::string& phoneNumber,
+				const std::string& phoneNumber
 			);
 
 			~Phone();
