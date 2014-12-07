@@ -12,13 +12,16 @@ using WhatsAcppi::Phone;
 int main(int argc, char*argv[]){
 	if(argc < 2){
 		cout << "Ussage:" << endl;
-		cout << "\t" << argv[0] << " PHONE_NUMBER" << endl;
+		cout << "\t" << argv[0] << " PHONE_NUMBER [CARRIER NAME]" << endl;
 		return 0;
 	}
 
 	Phone phone(argv[1]);
 
-	phone.guessPhoneInformation();
+	if(argc > 2)
+		phone.guessPhoneInformation(argv[2]);
+	else
+		phone.guessPhoneInformation();
 
 	#define PRINT(X) cout << #X << ": " << phone.get##X() << endl
 	PRINT(PhoneNumber);

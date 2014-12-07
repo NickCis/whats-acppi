@@ -1,5 +1,9 @@
 #include "phone.h"
 #include "countries.h"
+#include "network_info.h"
+
+#include <algorithm>
+#include <locale>
 
 using WhatsAcppi::Phone;
 using std::string;
@@ -12,9 +16,7 @@ Phone::~Phone(){
 
 void Phone::guessPhoneInformation(const string& carrier){
 	this->dissectPhone();
-
-	if(! carrier.empty())
-		this->detectMnc(carrier);
+	this->detectMnc(carrier);
 }
 
 void Phone::dissectPhone(){
@@ -42,6 +44,18 @@ void Phone::dissectPhone(){
 }
 
 void Phone::detectMnc(const string& carrier){
+	if(carrier.empty())
+		return;
+
+	string iso3166Lower(this->iso3166);
+	std::transform(iso3166Lower.begin(), iso3166Lower.end(), iso3166Lower.begin(), ::tolower);
+
+	for(int i=0; NETWORK_INFO[i].mnc != NULL; i++){
+		if(iso3166Lower == NETWORK_INFO[i].iso3166 && carrier == NETWORK_INFO[i].carrierName){
+			this->mnc = NETWORK_INFO[i].mnc;
+			break;
+		}
+	}
 }
 
 const string& Phone::getCountry() const {

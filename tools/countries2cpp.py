@@ -42,6 +42,6 @@ for row in csvreader:
         "},"
     ))
 
-print("\t{NULL, 0, 0, NULL, NULL, NULL}")
+print("\t{NULL, NULL, NULL, NULL, NULL, NULL}")
 print("};")
 print("#endif")
