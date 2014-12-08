@@ -1,25 +1,23 @@
 #ifndef __WHATS_ACPPI_REGISTER_H__
 #define __WHATS_ACPPI_REGISTER_H__
 #include <string>
+#include <vector>
 
 #include "phone.h"
-/*
+
 namespace WhatsAcppi {
 	class Register {
 		public:
-			Register(
-				Phone& phone,
-				const std::string& carrier,
-				const std::string& contryCode,
-				const std::string& langCode
-			);
+			Register(const Phone& phone, const std::vector<char>& identity);
+			~Register();
 
-			int codeRequest();
+			int codeRequest(const std::string& method);
 
 		protected:
-			Phone& phone;
-			generateRequestToken();
+			const Phone& phone;
+			std::vector<char> generateRequestToken();
+			const std::vector<char>& identity;
 	};
-}*/
+}
 
 #endif
