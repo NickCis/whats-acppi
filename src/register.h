@@ -8,6 +8,16 @@
 namespace WhatsAcppi {
 	class Register {
 		public:
+			typedef enum RegisterStatus {
+				REGISTER_UNKNOWN=0,
+				REGISTER_CODE_REQUESTED,
+				REGISTER_CODE_REQUESTED_HTTP_ERROR,
+				REGISTER_CODE_REQUESTED_WA_ERROR,
+				REGISTER_CODE_REGISTERED,
+				REGISTER_CODE_REGISTERED_HTTP_ERROR,
+				REGISTER_CODE_REGISTERED_WA_ERROR
+			} RegisterStatus;
+
 			/** Create a Register Object.
 			 * The phone must have all it's data setted, if you do not set some values, please call Phone::guessPhoneInformation(), before creating a Register
 			 * @param phone[in]: Phone details. 
@@ -32,6 +42,9 @@ namespace WhatsAcppi {
 			const std::string& getStatus() const;
 			const std::string& getReason() const;
 			const int& getRetryAfter() const;
+			const RegisterStatus& getSt() const;
+			const std::string& getPw() const;
+			const std::string& getLogin() const;
 
 		protected:
 			const Phone& phone;
@@ -41,6 +54,9 @@ namespace WhatsAcppi {
 			std::string status;
 			std::string reason;
 			int retryAfter;
+			RegisterStatus st;
+			std::string pw;
+			std::string login;
 	};
 }
 

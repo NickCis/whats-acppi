@@ -31,7 +31,7 @@ using WhatsAcppi::Util::base64_encode;
 using WhatsAcppi::Util::base64_decode;
 using WhatsAcppi::Util::simpleJsonParser;
 
-Register::Register(const Phone& p, const string& i) : phone(p), identity(i), reason(""), retryAfter(0)  {
+Register::Register(const Phone& p, const string& i) : phone(p), identity(i), reason(""), retryAfter(0), st(REGISTER_UNKNOWN) {
 }
 
 Register::~Register(){
@@ -56,22 +56,28 @@ int Register::codeRequest(const string& method){
 
 	ret = req.get();
 
+	this->st = REGISTER_CODE_REQUESTED_HTTP_ERROR;
+
 	if(ret)
 		return -1;
+
+	this->st = REGISTER_CODE_REQUESTED;
 
 	simpleJsonParser(req.getData(), [this, &ret] (const stringstream &name, stringstream &value){
 		const string& n = name.str();
 		if(n == "status"){
 			this->status = value.str();
-			if(this->status != "sent")
+			if(this->status != "sent"){
 				ret = 1;
-		}else if(n == "reason"){
+				this->st = REGISTER_CODE_REQUESTED_WA_ERROR;
+			}
+		} else if(n == "reason"){
 			this->reason = value.str();
 		} else if(n == "retry_after"){
 			value >> retryAfter;
 		} else if(n == "length"){
 		} else if(n == "method"){
-		}else{
+		} else{ // XXX: use log
 			std::cout << "Unknown name: \"" << n << "\": " << value.str() << std::endl;
 		}
 	});
@@ -80,6 +86,7 @@ int Register::codeRequest(const string& method){
 }
 
 int Register::codeRegister(const string& code){
+	int ret = 0;
 	Request req(WHATSAPP_REGISTER_HOST, "https");
 	req.setHeader("Accept: text/json");
 	req.setUrlParam("in", this->phone.getPhone());
@@ -90,17 +97,40 @@ int Register::codeRegister(const string& code){
 	req.setUrlParam("code", code);
 	req.setUrlParam("network_radio_type", "1");
 
-	int ret = req.get();
+	ret = req.get();
 
-	if(ret){
-		std::cout << "Request failed. ret: " << ret << std::endl;
-	}
+	this->st = REGISTER_CODE_REGISTERED_HTTP_ERROR;
 
-	for(auto c : req.getData())
-		std::cout << c;
-	std::cout <<  std::endl;
+	if(ret)
+		return -1;
 
-	return 0;
+	this->st = REGISTER_CODE_REGISTERED;
+
+	simpleJsonParser(req.getData(), [this, &ret] (const stringstream &name, stringstream &value){
+		const string& n = name.str();
+		if(n == "status"){
+			this->status = value.str();
+			if(this->status != "ok"){
+				ret = 1;
+				this->st = REGISTER_CODE_REGISTERED_WA_ERROR;
+			}
+		}else if(n == "login"){
+			this->login = value.str();
+		} else if(n == "pw"){
+			this->pw = value.str();
+		} else if(n == "type"){
+		} else if(n == "expiration"){
+		} else if(n == "kind"){
+		} else if(n == "price"){
+		} else if(n == "cost"){
+		} else if(n == "currency"){
+		} else if(n == "price_expiration"){
+		} else{ // XXX: use log
+			std::cout << "Unknown name: \"" << n << "\": " << value.str() << std::endl;
+		}
+	});
+
+	return ret;
 }
 
 string Register::generateRequestToken(){
@@ -145,4 +175,12 @@ const std::string& Register::getReason() const {
 
 const int& Register::getRetryAfter() const {
 	return this->retryAfter;
+}
+
+const std::string& Register::getPw() const {
+	return this->pw;
+}
+
+const std::string& Register::getLogin() const {
+	return this->login;
 }

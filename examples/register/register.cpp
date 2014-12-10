@@ -16,9 +16,9 @@ using WhatsAcppi::Register;
 using WhatsAcppi::Util::sha1Str;
 
 int main(int argc, char*argv[]){
-	if(argc < 3){
+	if(argc < 4){
 		cout << "Ussage:" << endl;
-		cout << "\t" << argv[0] << " PHONE_NUMBER USERNAME [CARRIER NAME]" << endl;
+		cout << "\t" << argv[0] << " PHONE_NUMBER USERNAME CODE" << endl;
 		return 0;
 	}
 
@@ -26,36 +26,28 @@ int main(int argc, char*argv[]){
 
 	Phone phone(argv[1]);
 
-	if(argc > 3)
-		phone.guessPhoneInformation(argv[3]);
-	else
-		phone.guessPhoneInformation();
+	phone.guessPhoneInformation();
 
 	#define PRINT(X) cout << #X << ": " << phone.get##X() << endl
 	PRINT(PhoneNumber);
 	PRINT(Phone);
 	PRINT(Country);
 	PRINT(Cc);
-	PRINT(Mcc);
 	PRINT(Iso3166);
 	PRINT(Iso639);
-	PRINT(Mnc);
 	#undef PRINT
 
-	cout << "Registering" << endl;
+	cout << "** Registering code" << endl;
 
 	string identity = sha1Str(argv[2]);
 	Register reg(phone, identity);
 
-	int ret = reg.codeRequest("sms");
+	int ret = reg.codeRegister(argv[3]);
 	if(ret < 0){
 		cout << "Error in http request! ret:" << ret << endl;
 		return -1;
 	}else if(ret){
-		cout << "Error in whats app! ret:" << ret << endl;
-		cout << "Status: " << reg.getStatus() << endl;
-		cout << "Reason: " << reg.getReason() << endl;
-		cout << "Retry after: " << reg.getRetryAfter() << endl;
+		cout << "Whats app error! ret: " << ret << endl;
 		return 1;
 	}
 
