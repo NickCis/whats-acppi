@@ -1,11 +1,11 @@
 #include "request.h"
 
-#define WHATS_APP_USER_AGENT "WhatsApp/2.11.461 Android/4.3 Device/GalaxyS3"
-
-#include <iostream>
+#define WHATS_APP_USER_AGENT "WhatsApp/2.11.464 Android/4.3 Device/GalaxyS3"
 
 #ifdef __USE_CURL__
-#include <curl/curl.h>
+extern "C" {
+	#include <curl/curl.h>
+}
 #endif
 
 using std::string;
@@ -17,7 +17,7 @@ using WhatsAcppi::Util::Request;
 
 class Request::RequestInternal {
 	public:
-		RequestInternal(){
+		RequestInternal() : curl(NULL), slist(NULL){
 			#ifdef __USE_CURL__
 			this->curl = curl_easy_init();
 			#endif
@@ -27,18 +27,20 @@ class Request::RequestInternal {
 			#ifdef __USE_CURL__
 			if(curl)
 				curl_easy_cleanup(curl);
+			if(slist)
+				curl_slist_free_all(slist);
 			#endif
 		}
 
 		#ifdef __USE_CURL__
 		CURL *curl;
 		CURLcode res;
+		struct curl_slist *slist;
 		#endif
 };
 
 #ifdef __USE_CURL__
 static size_t curlWrite(void *contents, size_t size, size_t nmemb, void *userp){
-	std::cout << "se llama un curlWrite" << std::endl;
 	size_t realSize = size * nmemb;
 	vector<char>* response = (vector<char>*) userp;
 	response->resize(response->size()+realSize);
@@ -53,10 +55,12 @@ Request::Request(const string& h, const std::string& proto) :
 	protocol(proto)
 {
 	#ifdef __USE_CURL__
-	//curl_easy_setopt(this->me->curl, CURLOPT_HEADER, 0);
+	curl_easy_setopt(this->me->curl, CURLOPT_HEADER, 0);
 	curl_easy_setopt(this->me->curl, CURLOPT_USERAGENT, WHATS_APP_USER_AGENT);
 	curl_easy_setopt(this->me->curl, CURLOPT_WRITEFUNCTION, curlWrite);
 	curl_easy_setopt(this->me->curl, CURLOPT_WRITEDATA, (void*) &this->response);
+	curl_easy_setopt(this->me->curl, CURLOPT_SSL_VERIFYPEER, 0L);
+	//curl_easy_setopt(this->me->curl, CURLOPT_SSL_VERIFYHOST, 0L);
 	#endif
 }
 
@@ -66,7 +70,7 @@ void Request::setHeader(const std::string& header){
 
 void Request::setHeader(const char* header){
 	#ifdef __USE_CURL__
-	curl_easy_setopt(this->me->curl, CURLOPT_HTTPHEADER, header);
+	this->me->slist = curl_slist_append(this->me->slist, header);
 	#endif
 }
 
@@ -91,21 +95,15 @@ string Request::urlEncode(const string& data){
 }
 
 void Request::setUrlParam(const string& name, const string& value){
-	if(!this->params.eof())
-		this->params << "&";
-	this->params << name << "=" << value;
+	this->params << name << "=" << value << "&";
 }
 
 void Request::setUrlParam(const string& name, const std::vector<char>& value){
-	if(!this->params.eof())
-		this->params << "&";
-	this->params << name << "=" << this->urlEncode(value);
+	this->params << name << "=" << this->urlEncode(value) << "&";
 }
 
 void Request::setUrlParam(const string& name, const int& value){
-	if(!this->params.eof())
-		this->params << "&";
-	this->params << name << "=" << value;
+	this->params << name << "=" << value << "&";
 }
 
 int Request::get(){
@@ -114,8 +112,9 @@ int Request::get(){
 
 	ss << this->protocol << "://" << this->host << "?" << this->params.str();
 	#ifdef __USE_CURL__
+	if(this->me->slist)
+		curl_easy_setopt(this->me->curl, CURLOPT_HTTPHEADER, this->me->slist);
 	curl_easy_setopt(this->me->curl, CURLOPT_URL, ss.str().c_str());
-	std::cout << "url: " << ss.str() << std::endl;
 	this->me->res = curl_easy_perform(this->me->curl);
 	if(this->me->res)
 		ret = -1;

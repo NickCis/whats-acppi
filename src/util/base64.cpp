@@ -18,9 +18,9 @@ static inline bool is_base64(char c) {
 	return (isalnum(c) || (c == '+') || (c == '/'));
 }
 
-//string WhatsAcppi::Util::base64_encode(const vector<char>& buf) {
-//	return base64_encode(buf.data(), buf.size());
-//}
+string WhatsAcppi::Util::base64_encode(const vector<char>& buf) {
+	return base64_encode(buf.data(), buf.size());
+}
 
 string WhatsAcppi::Util::base64_encode(const char *buf, unsigned int bufLen) {
 	string ret;

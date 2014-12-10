@@ -8,7 +8,7 @@ SRC_PATH=./src/
 LIB_PATH=./lib/
 
 HEADERS=$(SRC_PATH)/phone.h $(SRC_PATH)/register.h
-OBJECTS=$(SRC_PATH)/phone.o $(SRC_PATH)/register.o $(SRC_PATH)/util/base64.o $(SRC_PATH)/util/sha1.o $(SRC_PATH)/util/request.o $(SRC_PATH)/util/util.o
+OBJECTS=$(SRC_PATH)/phone.o $(SRC_PATH)/register.o $(SRC_PATH)/util/base64.o $(SRC_PATH)/util/sha1.o $(SRC_PATH)/util/request.o $(SRC_PATH)/util/util.o $(SRC_PATH)/util/json.o
 OUT=$(LIB_PATH)/libwhats_acppi.so
 
 # TODO: only put curl if compiling with curl

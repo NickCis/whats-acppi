@@ -13,7 +13,7 @@ using std::vector;
 
 using WhatsAcppi::Phone;
 using WhatsAcppi::Register;
-using WhatsAcppi::Util::sha1;
+using WhatsAcppi::Util::sha1Str;
 
 int main(int argc, char*argv[]){
 	if(argc < 3){
@@ -44,12 +44,22 @@ int main(int argc, char*argv[]){
 
 	cout << "Registering" << endl;
 
-	vector<char> identity = sha1(argv[2]);
+	string identity = sha1Str(argv[2]);
 	Register reg(phone, identity);
 
 	int ret = reg.codeRequest("sms");
+	if(ret < 0){
+		cout << "Error in http request! ret:" << ret << endl;
+		return -1;
+	}else if(ret){
+		cout << "Error in whats app! ret:" << ret << endl;
+		cout << "Status: " << reg.getStatus() << endl;
+		cout << "Reason: " << reg.getReason() << endl;
+		cout << "Retry after: " << reg.getRetryAfter() << endl;
+		return 1;
+	}
 
-	cout << "return " << ret << endl;
+	cout << "Success! ret: " << ret << endl;
 
 	return 0;
 }
