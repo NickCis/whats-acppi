@@ -4,6 +4,9 @@
 #include <string>
 #include <vector>
 
+#define SHA1_BIN_LENGTH 20
+#define SHA1_STR_LENGTH 40
+
 namespace WhatsAcppi {
 	namespace Util {
 		std::vector<char> sha1(const std::vector<char> & data);

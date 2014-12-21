@@ -12,10 +12,10 @@ namespace WhatsAcppi {
 			 * @param phoneNumber: Phone number or username, country code + number without + or 00)
 			 */
 			Phone(const std::string& phoneNumber);
-			Phone(const Phone& p);
+			/*Phone(const Phone& p);
 			Phone& operator=(const Phone& p);
 
-			~Phone();
+			~Phone();*/
 
 			/**  Getters (see properties for description)
 			 */

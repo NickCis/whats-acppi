@@ -11,39 +11,6 @@ using std::string;
 Phone::Phone(const string& p) : phoneNumber(p){
 }
 
-#define COPY_VALUE(X) X(p.X)
-Phone::Phone(const Phone& p) :
-	COPY_VALUE(phoneNumber),
-	COPY_VALUE(iso3166),
-	COPY_VALUE(iso639),
-	COPY_VALUE(country),
-	COPY_VALUE(cc),
-	COPY_VALUE(mcc),
-	COPY_VALUE(mnc),
-	COPY_VALUE(phone)
-{
-}
-#undef COPY_VALUE
-
-Phone& Phone::operator=(const Phone& p){
-	if(this != &p){
-		#define COPY_VALUE(X) this->X = p.X
-		COPY_VALUE(phoneNumber);
-		COPY_VALUE(iso3166);
-		COPY_VALUE(iso639);
-		COPY_VALUE(country);
-		COPY_VALUE(cc);
-		COPY_VALUE(mcc);
-		COPY_VALUE(mnc);
-		COPY_VALUE(phone);
-		#undef COPY_VALUE
-	}
-	return *this;
-}
-
-Phone::~Phone(){
-}
-
 void Phone::guessPhoneInformation(const string& carrier){
 	this->dissectPhone();
 	this->detectMnc(carrier);

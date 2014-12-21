@@ -7,9 +7,6 @@
 using std::vector;
 using std::string;
 
-#define SHA1_BIN_LENGTH 20
-#define SHA1_STR_LENGTH 40
-
 #ifdef __USE_OPENSSL__
 vector<char> WhatsAcppi::Util::sha1(const char* data, size_t size){
 	vector<char> ret;

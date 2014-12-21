@@ -15,35 +15,31 @@ using std::stringstream;
 
 using WhatsAcppi::Util::Request;
 
+#ifdef __USE_CURL__
 class Request::RequestInternal {
 	public:
-		RequestInternal() : curl(NULL), slist(NULL){
-			#ifdef __USE_CURL__
+		RequestInternal() : curl(NULL), slist(NULL) {
 			this->curl = curl_easy_init();
-			#endif
 		}
 
 		~RequestInternal(){
-			#ifdef __USE_CURL__
 			if(curl)
 				curl_easy_cleanup(curl);
 			if(slist)
 				curl_slist_free_all(slist);
-			#endif
 		}
 
-		#ifdef __USE_CURL__
 		CURL *curl;
 		CURLcode res;
 		struct curl_slist *slist;
-		#endif
 };
+#endif
 
 #ifdef __USE_CURL__
 static size_t curlWrite(void *contents, size_t size, size_t nmemb, void *userp){
 	size_t realSize = size * nmemb;
 	vector<char>* response = (vector<char>*) userp;
-	response->resize(response->size()+realSize);
+	response->reserve(response->size()+realSize);
 	response->insert(response->end(), (char*)contents, ((char*)contents)+realSize);
 	return realSize;
 }
