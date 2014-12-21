@@ -3,35 +3,42 @@
 #include "token_map.h"
 
 #include <memory>
+extern "C" {
+	#include <stdint.h>
+}
 
 using std::map;
 using std::vector;
 using std::string;
 using std::shared_ptr;
 
+using WhatsAcppi::Protocol::KeyStream;
 using WhatsAcppi::Protocol::tryGetToken;
 using WhatsAcppi::Protocol::BinTreeNodeWriter;
 
-BinTreeNodeWriter::BinTreeNodeWriter()
-{
+BinTreeNodeWriter::BinTreeNodeWriter(){
 }
 
 void BinTreeNodeWriter::streamStart(const string& domain, const string& resource){
+	this->clear();
+
 	this->write8('W');
 	this->write8('A');
 	this->write8(1);
 	this->write8(5);
 
+	size_t headerPos = this->data.size(); // Es fija? 4?
+	this->write24(0); // -> son 3 bytes
+
 	std::map<std::string, std::string> attributes;
-	attributes.clear();
 	attributes["to"] = domain;
 	attributes["resource"] = resource;
-
 	this->writeListStart(attributes.size() * 2 + 1);
 
 	this->write8(1);
 
 	this->writeAttributes(attributes);
+	this->processBuffer(headerPos, NULL);
 }
 
 void BinTreeNodeWriter::writeListStart(int i){
@@ -83,6 +90,19 @@ void BinTreeNodeWriter::writeToken(const int& token){
 		this->write8(0xfe);
 		this->write8(token-0xf5);
 	}
+}
+
+void BinTreeNodeWriter::write(const Node& node, KeyStream* key){
+	this->clear();
+	size_t headerPos = this->data.size(); // Es fija? 0?
+	this->write24(0); // -> son 3 bytes
+
+	if(node.getTag() == ""){
+		this->write8(0);
+		this->writeNode(node);
+	}
+
+	this->processBuffer(headerPos, key);
 }
 
 void BinTreeNodeWriter::writeNode(const Node& node){
@@ -145,4 +165,29 @@ void BinTreeNodeWriter::writeBytes(const vector<char>& bytes){
 void BinTreeNodeWriter::write24(const int &c){
 	this->write8((c & 0xFF0000) >> 16);
 	this->write16(c & 0xFFFF);
+}
+
+void BinTreeNodeWriter::processBuffer(size_t headerPosition, KeyStream* crypto){
+	int num = 0;
+	int64_t num3 = this->data.size() - 3 - headerPosition;
+
+	if(crypto){
+		num = 8;
+		num3 += 4;
+	}
+
+	if (num3 > 0x1000000) { // TODO: error. Buffer too large
+	}
+
+	if(crypto){
+		int length = ((int) num3) - 4;
+		// El 3 viene de que el header del size son 3 bytes (se escribio como 0 anteriormente por qe no se sabia el size)
+		crypto->encodeMessage(this->data, (headerPosition + 3) + length, headerPosition + 3, length);
+	}
+
+	char *buffer = this->data.data();
+	// Corrijo el size que antes se escribio como 0
+	buffer[headerPosition] = ((num << 4) | (num3 & 0xff0000) >> 0x10);
+	buffer[headerPosition+1] = ((num3 & 0xff00) >> 8);
+	buffer[headerPosition+2] = (num3 & 0xff);
 }

@@ -65,17 +65,14 @@ int WA::doLogin(){
 
 	writer.streamStart(WHATSAPP_SERVER, ss.str());
 	this->sock.write(writer.getData());
-	writer.clear();
 
 	Node featuresNode = this->createFeaturesNode();
-	writer.writeNode(featuresNode);
+	writer.write(featuresNode);
 	this->sock.write(writer.getData());
-	writer.clear();
 
 	Node auth = this->createAuthNode();
-	writer.writeNode(auth);
+	writer.write(auth);
 	this->sock.write(writer.getData());
-	writer.clear();
 
 	this->pollMessage();
 	this->pollMessage();
@@ -179,5 +176,8 @@ vector<char> WA::readStanza(){
 
 bool WA::pollMessage(){
 	vector<char> stanza = this->readStanza();
-	return true;
+	if(stanza.size() > 0){
+		return true;
+	}
+	return false;
 }

@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "node.h"
+#include "key_stream.h"
 
 namespace WhatsAcppi {
 	namespace Protocol {
@@ -17,8 +18,7 @@ namespace WhatsAcppi {
 				const std::vector<char>& getData() const;
 				void clear();
 
-				void writeNode(const Node& node);
-				void encrypt();
+				void write(const Node& node, KeyStream* key=NULL);
 
 			protected:
 				std::vector<char> data;
@@ -31,6 +31,8 @@ namespace WhatsAcppi {
 				void write16(const int &c);
 				void write24(const int &c);
 				void writeBytes(const std::vector<char>& bytes);
+				void writeNode(const Node& node);
+				void processBuffer(size_t headerPosition, KeyStream* crypto);
 		};
 	}
 }
