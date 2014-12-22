@@ -19,6 +19,7 @@ OBJECTS=\
 	$(SRC_PATH)/util/hmac_sha1.o \
 	$(SRC_PATH)/util/rc4.o \
 	$(SRC_PATH)/util/pbkdf2.o \
+	$(SRC_PATH)/util/socket.o \
 	$(SRC_PATH)/protocol/wa.o \
 	$(SRC_PATH)/protocol/bin_tree_node_writer.o \
 	$(SRC_PATH)/protocol/node.o \

@@ -111,7 +111,6 @@ Node WA::createAuthNode(){
 shared_ptr<vector<char>> WA::createAuthBlob(){
 	shared_ptr<vector<char>> data;
 	if(this->challengeData->size()){
-		std::vector<char> base64_decode(const std::string& encoded_string);
 		vector<char> key = pkbdf2(base64_decode(this->password), *this->challengeData, 16);
 
 		inputKey = unique_ptr<KeyStream>(new KeyStream(key[2], key[3]));

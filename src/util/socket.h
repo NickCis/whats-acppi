@@ -1,6 +1,8 @@
 #ifndef __WHATS_ACPPI_SOCKET_H__
 #define __WHATS_ACPPI_SOCKET_H__
+
 #include <vector>
+#include <string>
 
 namespace WhatsAcppi {
 	namespace Util {

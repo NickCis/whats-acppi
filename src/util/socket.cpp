@@ -3,7 +3,10 @@
 extern "C" {
 	#include <sys/types.h>
 	#include <sys/socket.h>
+	#include <netinet/tcp.h>
 	#include <netdb.h>
+	#include <string.h>
+	#include <unistd.h>
 }
 
 using std::vector;
@@ -33,9 +36,9 @@ int Socket::connect(){
 	::memset(&hints, 0, sizeof(struct addrinfo));
 	hints.ai_family = AF_INET;
 	hints.ai_socktype = SOCK_STREAM;
-	hints.ai_ai_protocol = SOL_TCP;
+	hints.ai_protocol = SOL_TCP;
 
-	ret = ::getaddrinfo(this->host.c_str(), this.port.c_str(), &hints, &res);
+	ret = ::getaddrinfo(this->host.c_str(), this->port.c_str(), &hints, &res);
 
 	if(ret || !res)
 		return -1;
@@ -46,7 +49,7 @@ int Socket::connect(){
 		return -1;
 	}
 
-	ret = ::connect(this->sock, (struct sockaddr_in*) res->ai_addr, res->ai_addrlen);
+	ret = ::connect(this->sock, (struct sockaddr*) res->ai_addr, res->ai_addrlen);
 	::freeaddrinfo(res);
 	if(ret){
 		this->close();
@@ -62,14 +65,17 @@ int Socket::close(){
 	if(this->sock > 0){
 		::close(this->sock);
 		this->st = SOCK_DISCONNECTED;
+		return -1;
 	}
+
+	return 0;
 }
 
 void Socket::setTimeout(int sec, int usec){
 	// TODO: this is posix specific, in windows things go different!
 	struct timeval tv;
-	tv.tv_sec = TIMEOUT_SEC;
-	tv.tv_usec = TIMEOUT_USEC;
+	tv.tv_sec = sec;
+	tv.tv_usec = usec;
 	::memset(&tv, 0, sizeof(struct timeval));
 	::setsockopt(this->sock, SOL_SOCKET, SO_RCVTIMEO, (void*) &tv, sizeof(struct timeval));
 	::setsockopt(this->sock, SOL_SOCKET, SO_SNDTIMEO, (void*) &tv, sizeof(struct timeval));

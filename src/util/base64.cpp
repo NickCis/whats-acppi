@@ -1,9 +1,5 @@
 #include "base64.h"
 
-#ifdef __USE_CURL__
-#include <curl/curl.h>
-#endif
-
 using std::string;
 using std::vector;
 

@@ -492,7 +492,7 @@ int WhatsAcppi::Protocol::tryGetToken(const std::string& token, bool &secondary)
 	return -1;
 }
 
-string getToken(int token, bool &subdict){
+string WhatsAcppi::Protocol::getToken(int token, bool &subdict){
 	if( ! subdict && token >= 236 && token < (236 + SECONDARY_DICT_SIZE))
 		subdict = true;
 
