@@ -8,6 +8,10 @@ namespace WhatsAcppi {
 		 * @return -1: not found, 0>= token
 		 */
 		int tryGetToken(const std::string& token, bool& secondary);
+
+		/**
+		 */
+		std::string getToken(int token, bool &subdict);
 	}
 }
 

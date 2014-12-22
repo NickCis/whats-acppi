@@ -1,11 +1,15 @@
 #include "wa.h"
-#include "bin_tree_node_writer.h"
 #include "node.h"
+#include "bin_tree_node_writer.h"
+#include "bin_tree_node_reader.h"
 #include "../util/pbkdf2.h"
 #include "../util/base64.h"
 
 #include <cmath>
 #include <sstream>
+
+// XXX: debug purpose
+#include <iostream>
 
 extern "C" {
 	#include <time.h>
@@ -34,6 +38,7 @@ using WhatsAcppi::Util::base64_decode;
 using WhatsAcppi::Protocol::WA;
 using WhatsAcppi::Protocol::Node;
 using WhatsAcppi::Protocol::BinTreeNodeWriter;
+using WhatsAcppi::Protocol::BinTreeNodeReader;
 
 WA::WA(const Phone& p, const string& i, const string& n) :
 	phone(p),
@@ -174,10 +179,33 @@ vector<char> WA::readStanza(){
 	return output;
 }
 
-bool WA::pollMessage(){
+bool WA::pollMessage(bool autoReceipt, ProcessType type){
 	vector<char> stanza = this->readStanza();
 	if(stanza.size() > 0){
+		this->processInboundData(stanza, autoReceipt, type);
 		return true;
 	}
 	return false;
+}
+
+void WA::processInboundData(std::vector<char>& data, bool autoReceipt, ProcessType type){
+	BinTreeNodeReader reader;
+
+	Node node = reader.nextTree(data, inputKey ? inputKey.get() : NULL);
+	if(node){
+		this->processInboundDataNode(node, autoReceipt, type);
+	}
+}
+
+void WA::processInboundDataNode(Node &node, bool autoReceipt, ProcessType type){
+	std::cout << "Llego node -> tag: " << node.getTag() << std::endl;
+	std::cout << "id: " << node.getTag() << std::endl;
+	std::cout << "data: -------" << std::endl << node.getData() << std::endl << "-----------" << std::endl;
+
+	// TODO: implement handlers!
+	if(node.getTag() == "challenge"){
+		this->challengeData = node.getData();
+	} else if(node.getTag() == "success"){
+		this->challengeData = node.getData();
+	}
 }

@@ -23,6 +23,7 @@ OBJECTS=\
 	$(SRC_PATH)/protocol/bin_tree_node_writer.o \
 	$(SRC_PATH)/protocol/node.o \
 	$(SRC_PATH)/protocol/key_stream.o \
+	$(SRC_PATH)/protocol/bin_tree_node_reader.o \
 	$(SRC_PATH)/protocol/token_map.o
 
 OUT=$(LIB_PATH)/libwhats_acppi.so

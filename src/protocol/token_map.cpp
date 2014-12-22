@@ -242,6 +242,8 @@ static const char * const primaryStrings[] = {
 	NULL
 };
 
+#define PRIMARY_DICT_SIZE 236
+
 static const char * const secondaryStrings[] = {
 	"mpeg4",
 	"wmv",
@@ -466,9 +468,11 @@ static const char * const secondaryStrings[] = {
 	"everyone",
 	"v",
 	"transport",
-	"call-id",
+	"call-id", // -> size: 224
 	NULL
 };
+
+#define SECONDARY_DICT_SIZE 224
 
 
 int WhatsAcppi::Protocol::tryGetToken(const std::string& token, bool &secondary){
@@ -488,3 +492,14 @@ int WhatsAcppi::Protocol::tryGetToken(const std::string& token, bool &secondary)
 	return -1;
 }
 
+string getToken(int token, bool &subdict){
+	if( ! subdict && token >= 236 && token < (236 + SECONDARY_DICT_SIZE))
+		subdict = true;
+
+	auto tokenMap = subdict ? secondaryStrings : primaryStrings;
+
+	if(token < 0 || (subdict && token >= SECONDARY_DICT_SIZE ) || (!subdict && token >= PRIMARY_DICT_SIZE))
+		return ""; // ERROR
+
+	return string(tokenMap[token]);
+}

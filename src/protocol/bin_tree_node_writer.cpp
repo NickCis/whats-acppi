@@ -185,9 +185,8 @@ void BinTreeNodeWriter::processBuffer(size_t headerPosition, KeyStream* crypto){
 		crypto->encodeMessage(this->data, (headerPosition + 3) + length, headerPosition + 3, length);
 	}
 
-	char *buffer = this->data.data();
 	// Corrijo el size que antes se escribio como 0
-	buffer[headerPosition] = ((num << 4) | (num3 & 0xff0000) >> 0x10);
-	buffer[headerPosition+1] = ((num3 & 0xff00) >> 8);
-	buffer[headerPosition+2] = (num3 & 0xff);
+	this->data[headerPosition] = ((num << 4) | (num3 & 0xff0000) >> 0x10);
+	this->data[headerPosition+1] = ((num3 & 0xff00) >> 8);
+	this->data[headerPosition+2] = (num3 & 0xff);
 }
