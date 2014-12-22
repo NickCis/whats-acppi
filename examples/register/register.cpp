@@ -52,6 +52,8 @@ int main(int argc, char*argv[]){
 	}
 
 	cout << "Success! ret: " << ret << endl;
+	cout << "Pw: " << reg.getPw() << endl;
+	cout << "Login: " << reg.getLogin() << endl;
 
 	return 0;
 }

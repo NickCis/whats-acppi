@@ -1,6 +1,6 @@
 #include "request.h"
 
-#define WHATS_APP_USER_AGENT "WhatsApp/2.11.464 Android/4.3 Device/GalaxyS3"
+#define WHATS_APP_USER_AGENT "WhatsApp/2.11.473 Android/4.3 Device/GalaxyS3"
 
 #ifdef __USE_CURL__
 extern "C" {

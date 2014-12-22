@@ -46,8 +46,10 @@ int Register::codeRequest(const string& method){
 	req.setUrlParam("id", req.urlEncode(this->identity));
 	req.setUrlParam("lg", this->phone.getIso639());
 	req.setUrlParam("lc", this->phone.getIso3166());
-	req.setUrlParam("mcc", this->phone.getMcc());
-	req.setUrlParam("mnc", this->phone.getMnc());
+	//req.setUrlParam("mcc", this->phone.getMcc());
+	req.setUrlParam("mcc", "000");
+	//req.setUrlParam("mnc", this->phone.getMnc());
+	req.setUrlParam("mnc", "000");
 	req.setUrlParam("sim_mcc", this->phone.getMcc());
 	req.setUrlParam("sim_mnc", this->phone.getMnc());
 	req.setUrlParam("method", method);
