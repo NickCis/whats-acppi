@@ -59,16 +59,19 @@ int WA::doLogin(){
 	BinTreeNodeWriter writer;
 
 	writer.streamStart(WHATSAPP_SERVER, ss.str());
+	Log() << "streamStart :: size " << writer.getData().size();
 	Log() << writer.getData();
 	this->sock.write(writer.getData());
 
 	Node featuresNode = this->createFeaturesNode();
 	writer.write(featuresNode);
+	Log() << "featuresNode :: size " << writer.getData().size();
 	Log() << writer.getData();
 	this->sock.write(writer.getData());
 
 	Node auth = this->createAuthNode();
 	writer.write(auth);
+	Log() << "authNode :: size " << writer.getData().size();
 	Log() << writer.getData();
 	this->sock.write(writer.getData());
 
@@ -147,7 +150,8 @@ shared_ptr<vector<char>> WA::createAuthBlob(){
 
 vector<char> WA::readStanza(){
 	vector<char> output;
-	this->sock.recv(output, 3);
+	ssize_t sSize = this->sock.recv(output, 3);
+	Log() << "sSize " << sSize;
 
 	if(output.size() != 3){ // TODO: error
 		return vector<char>();
@@ -157,23 +161,23 @@ vector<char> WA::readStanza(){
 	treeLength |= output[1] << 8;
 	treeLength |= output[2] << 0;
 
-	output.reserve(output.size() + treeLength);
+	Log() << "output[0] " << output[0];
+	Log() << "output[1] " << output[1];
+	Log() << "output[2] " << output[2];
 
-	ssize_t readSize = this->sock.recv(output.data()+output.size(), treeLength);
+	Log() << "treeLength " << treeLength;
+
+	ssize_t readSize = this->sock.recv(output, treeLength);
 	if(readSize <= 0){ // TODO: error
 	}
 
-	output.resize(output.size()+readSize);
-
 	while(output.size() < treeLength){
 		int toRead = treeLength - output.size();
-		ssize_t readSize = this->sock.recv(output.data()+output.size(), toRead);
+		ssize_t readSize = this->sock.recv(output, toRead);
 
 		if(readSize <= 0){ // TODO: error
 			break;
 		}
-
-		output.resize(output.size()+readSize);
 	}
 
 	return output;

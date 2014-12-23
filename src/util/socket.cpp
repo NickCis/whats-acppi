@@ -45,7 +45,7 @@ int Socket::connect(){
 
 	this->sock = ::socket(res->ai_family, res->ai_socktype, res->ai_protocol);
 	if(this->sock == -1){
-		freeaddrinfo(res);
+		::freeaddrinfo(res);
 		return -1;
 	}
 
@@ -102,15 +102,15 @@ ssize_t Socket::recv(char* buf, size_t len){
 	return ::recv(this->sock, (void*) buf, len, 0);
 }
 
-#include <iostream>
-
 ssize_t Socket::recv(vector<char>& out, size_t len){
-	out.resize(0);
-	out.reserve(len);
+	size_t start = out.size();
+	out.resize(start+len);
 
-	ssize_t readSize = this->recv(out.data(), len);
+	ssize_t readSize = this->recv(out.data()+start, len);
 	if(readSize > 0)
-		out.resize(readSize);
+		out.resize(start+readSize);
+	else
+		out.resize(start);
 
 	return readSize;
 }

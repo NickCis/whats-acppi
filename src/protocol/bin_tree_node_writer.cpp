@@ -1,6 +1,7 @@
 #include "bin_tree_node_writer.h"
 
 #include "token_map.h"
+#include "../util/log.h"
 
 #include <memory>
 extern "C" {
@@ -12,6 +13,7 @@ using std::vector;
 using std::string;
 using std::shared_ptr;
 
+using WhatsAcppi::Util::Log;
 using WhatsAcppi::Protocol::KeyStream;
 using WhatsAcppi::Protocol::tryGetToken;
 using WhatsAcppi::Protocol::BinTreeNodeWriter;
@@ -22,22 +24,25 @@ BinTreeNodeWriter::BinTreeNodeWriter(){
 void BinTreeNodeWriter::streamStart(const string& domain, const string& resource){
 	this->clear();
 
-	this->write8('W');
-	this->write8('A');
-	this->write8(1);
-	this->write8(5);
+	this->write8('W'); // 0x57
+	this->write8('A'); // 0x41
+	this->write8(1); // 0x01
+	this->write8(5); // 0x05
 
 	size_t headerPos = this->data.size(); // Es fija? 4?
+	Log() << "headerPos " << headerPos;
 	this->write24(0); // -> son 3 bytes
 
 	std::map<std::string, std::string> attributes;
-	attributes["to"] = domain;
+	// XXX: Is it importart attributes order?
 	attributes["resource"] = resource;
-	this->writeListStart(attributes.size() * 2 + 1);
+	attributes["to"] = domain;
+	this->writeListStart(attributes.size() * 2 + 1); // -> 0xf8 0x05
 
-	this->write8(1);
+	this->write8(1); // -> 0x01
 
 	this->writeAttributes(attributes);
+
 	this->processBuffer(headerPos, NULL);
 }
 
@@ -55,7 +60,6 @@ void BinTreeNodeWriter::writeListStart(int i){
 
 void BinTreeNodeWriter::writeAttributes(const map<string, string>& attributes){
 	for(auto it = attributes.begin(); it != attributes.end(); it++){
-
 		this->writeString(it->first);
 		this->writeString(it->second);
 	}
@@ -65,6 +69,9 @@ void BinTreeNodeWriter::writeString(const string& tag){
 	int token;
 	bool secondary;
 	token = tryGetToken(tag, secondary);
+
+	Log() << "tag " << tag << " token " << token;
+
 	if(token >= 0){
 		if(secondary)
 			this->writeToken(236);
@@ -109,6 +116,7 @@ void BinTreeNodeWriter::write(const Node& node, KeyStream* key){
 
 	if(node.getTag() == ""){
 		this->write8(0);
+	}else{
 		this->writeNode(node);
 	}
 

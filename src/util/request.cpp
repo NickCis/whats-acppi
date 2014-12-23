@@ -51,7 +51,7 @@ Request::Request(const string& h, const std::string& proto) :
 {
 	#ifdef __USE_CURL__
 	curl_easy_setopt(this->me->curl, CURLOPT_HEADER, 0);
-	curl_easy_setopt(this->me->curl, CURLOPT_USERAGENT, WHATS_APP_USER_AGENT);
+	curl_easy_setopt(this->me->curl, CURLOPT_USERAGENT, WHATSAPP_USER_AGENT);
 	curl_easy_setopt(this->me->curl, CURLOPT_WRITEFUNCTION, curlWrite);
 	curl_easy_setopt(this->me->curl, CURLOPT_WRITEDATA, (void*) &this->response);
 	curl_easy_setopt(this->me->curl, CURLOPT_SSL_VERIFYPEER, 0L);
