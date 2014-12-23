@@ -31,6 +31,9 @@ namespace WhatsAcppi {
 				void write16(const int &c);
 				void write24(const int &c);
 				void writeBytes(const std::vector<char>& bytes);
+				void writeBytes(const std::string bytes);
+				void writeBytes(const char* bytes, const size_t size);
+				void writeJid(const std::string& user, const std::string& server);
 				void writeNode(const Node& node);
 				void processBuffer(size_t headerPosition, KeyStream* crypto);
 		};

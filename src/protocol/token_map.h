@@ -8,6 +8,7 @@ namespace WhatsAcppi {
 		 * @return -1: not found, 0>= token
 		 */
 		int tryGetToken(const std::string& token, bool& secondary);
+		int tryGetToken(const char* token, const size_t size, bool& secondary);
 
 		/**
 		 */

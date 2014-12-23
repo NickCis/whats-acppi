@@ -59,14 +59,17 @@ int WA::doLogin(){
 	BinTreeNodeWriter writer;
 
 	writer.streamStart(WHATSAPP_SERVER, ss.str());
+	Log() << writer.getData();
 	this->sock.write(writer.getData());
 
 	Node featuresNode = this->createFeaturesNode();
 	writer.write(featuresNode);
+	Log() << writer.getData();
 	this->sock.write(writer.getData());
 
 	Node auth = this->createAuthNode();
 	writer.write(auth);
+	Log() << writer.getData();
 	this->sock.write(writer.getData());
 
 	Log() << "Polling messages";

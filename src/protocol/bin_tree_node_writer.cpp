@@ -55,6 +55,7 @@ void BinTreeNodeWriter::writeListStart(int i){
 
 void BinTreeNodeWriter::writeAttributes(const map<string, string>& attributes){
 	for(auto it = attributes.begin(); it != attributes.end(); it++){
+
 		this->writeString(it->first);
 		this->writeString(it->second);
 	}
@@ -72,15 +73,24 @@ void BinTreeNodeWriter::writeString(const string& tag){
 		return;
 	}
 
-	//TODO
-	//int atIndex = tag.indexOf('@');
-	//if (atIndex < 1){
-	//	writeArray(tag.toUtf8(), out);
-	//}else{
-	//	QString server = tag.right(tag.length()-atIndex-1);
-	//	QString user = tag.left(atIndex);
-	//	writeJid(user, server, out);
-	//}
+	int atIndex = tag.find('@');
+	if (atIndex < 1){
+		this->writeBytes(tag);
+	}else{
+		string user = tag.substr(0, atIndex);
+		string server = tag.substr(atIndex);
+		this->writeJid(user, server);
+	}
+}
+
+void BinTreeNodeWriter::writeJid(const string& user, const string& server){
+	this->write8(250);
+	if(user.size() > 0)
+		this->writeString(user);
+	else
+		this->writeToken(0);
+
+	this->writeString(server);
 }
 
 void BinTreeNodeWriter::writeToken(const int& token){
@@ -148,18 +158,25 @@ void BinTreeNodeWriter::clear() {
 	this->data.resize(0);
 }
 
-void BinTreeNodeWriter::writeBytes(const vector<char>& bytes){
-	if(bytes.size() >= 256){
+void BinTreeNodeWriter::writeBytes(const char* bytes, const size_t size){
+	if(size >= 256){
 		this->write8(253);
-		this->write24(bytes.size());
+		this->write24(size);
 	} else {
 		this->write8(252);
-		this->write8(bytes.size());
+		this->write8(size);
 	}
 
-	const char *constData = bytes.data();
-	for(size_t i=0; i < bytes.size(); i++)
-		this->write8(constData[i]);
+	for(size_t i=0; i < size; i++)
+		this->write8(bytes[i]);
+}
+
+void BinTreeNodeWriter::writeBytes(const string bytes){
+	this->writeBytes(bytes.data(), bytes.size());
+}
+
+void BinTreeNodeWriter::writeBytes(const vector<char>& bytes){
+	this->writeBytes(bytes.data(), bytes.size());
 }
 
 void BinTreeNodeWriter::write24(const int &c){
