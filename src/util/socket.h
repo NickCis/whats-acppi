@@ -26,7 +26,7 @@ namespace WhatsAcppi {
 				int write(const void* buf, size_t size);
 				int write(const std::vector<char> &data);
 
-				std::vector<char> recv(size_t len);
+				ssize_t recv(std::vector<char> &out, size_t len);
 				ssize_t recv(char* buf, size_t len);
 
 			protected:

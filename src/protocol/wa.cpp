@@ -2,29 +2,17 @@
 #include "node.h"
 #include "bin_tree_node_writer.h"
 #include "bin_tree_node_reader.h"
+#include "../define.h"
+#include "../util/log.h"
 #include "../util/pbkdf2.h"
 #include "../util/base64.h"
 
 #include <cmath>
 #include <sstream>
 
-// XXX: debug purpose
-#include <iostream>
-
 extern "C" {
 	#include <time.h>
 }
-
-#define WHATSAPP_HOST "c.whatsapp.net"
-#define WHATSAPP_PORT 443
-#define WHATSAPP_PORT_STR "443"
-#define WHATSAPP_DEVICE "Android"
-#define WHATSAPP_VER "2.11.473"
-#define WHATSAPP_SERVER "s.whatsapp.net"
-#define WHATSAPP_USER_AGENT "WhatsApp/2.11.473 Android/4.3 Device/GalaxyS3"
-
-#define TIMEOUT_SEC 2
-#define TIMEOUT_USEC 0
 
 using std::vector;
 using std::string;
@@ -33,6 +21,7 @@ using std::unique_ptr;
 using std::stringstream;
 
 using WhatsAcppi::Phone;
+using WhatsAcppi::Util::Log;
 using WhatsAcppi::Util::pkbdf2;
 using WhatsAcppi::Util::base64_decode;
 using WhatsAcppi::Protocol::WA;
@@ -58,6 +47,7 @@ int WA::connect(){
 }
 
 int WA::login(const string& password){
+	// TODO: verify conenct
 	this->password = password;
 	return this->doLogin();
 }
@@ -79,9 +69,16 @@ int WA::doLogin(){
 	writer.write(auth);
 	this->sock.write(writer.getData());
 
-	this->pollMessage();
-	this->pollMessage();
-	this->pollMessage();
+	Log() << "Polling messages";
+
+	if(!this->pollMessage())
+		Log() << "Error 1";
+
+	if(!this->pollMessage())
+		Log() << "Error 2";
+
+	if(!this->pollMessage())
+		Log() << "Error 3";
 
 	return 0;
 }
@@ -110,7 +107,7 @@ Node WA::createAuthNode(){
 
 shared_ptr<vector<char>> WA::createAuthBlob(){
 	shared_ptr<vector<char>> data;
-	if(this->challengeData->size()){
+	if(this->challengeData && this->challengeData->size()){
 		vector<char> key = pkbdf2(base64_decode(this->password), *this->challengeData, 16);
 
 		inputKey = unique_ptr<KeyStream>(new KeyStream(key[2], key[3]));
@@ -146,7 +143,8 @@ shared_ptr<vector<char>> WA::createAuthBlob(){
 }
 
 vector<char> WA::readStanza(){
-	vector<char> output = this->sock.recv(3);
+	vector<char> output;
+	this->sock.recv(output, 3);
 
 	if(output.size() != 3){ // TODO: error
 		return vector<char>();
@@ -181,6 +179,8 @@ vector<char> WA::readStanza(){
 bool WA::pollMessage(bool autoReceipt, ProcessType type){
 	vector<char> stanza = this->readStanza();
 	if(stanza.size() > 0){
+		Log() << "stanza size " << stanza.size();
+		Log() << stanza;
 		this->processInboundData(stanza, autoReceipt, type);
 		return true;
 	}
@@ -197,9 +197,10 @@ void WA::processInboundData(std::vector<char>& data, bool autoReceipt, ProcessTy
 }
 
 void WA::processInboundDataNode(Node &node, bool autoReceipt, ProcessType type){
-	std::cout << "Llego node -> tag: " << node.getTag() << std::endl;
-	std::cout << "id: " << node.getTag() << std::endl;
-	std::cout << "data: -------" << std::endl << node.getData() << std::endl << "-----------" << std::endl;
+	Log() << "Llego node -> tag: " << node.getTag();
+	Log() << "id: " << node.getTag();
+	Log() << "data:";
+	Log() << node.getData();
 
 	// TODO: implement handlers!
 	if(node.getTag() == "challenge"){

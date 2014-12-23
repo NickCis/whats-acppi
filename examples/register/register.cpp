@@ -2,6 +2,7 @@
 #include <string>
 #include "../../src/phone.h"
 #include "../../src/register.h"
+#include "../../src/util/log.h"
 #include "../../src/util/util.h"
 #include "../../src/util/sha1.h"
 
@@ -13,6 +14,7 @@ using std::vector;
 
 using WhatsAcppi::Phone;
 using WhatsAcppi::Register;
+using WhatsAcppi::Util::Log;
 using WhatsAcppi::Util::sha1Str;
 
 int main(int argc, char*argv[]){
@@ -23,6 +25,7 @@ int main(int argc, char*argv[]){
 	}
 
 	WhatsAcppi::Util::Init init;
+	Log::setLogLevel(Log::DebugMsg);
 
 	Phone phone(argv[1]);
 

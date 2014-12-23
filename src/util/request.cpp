@@ -1,6 +1,5 @@
 #include "request.h"
-
-#define WHATS_APP_USER_AGENT "WhatsApp/2.11.473 Android/4.3 Device/GalaxyS3"
+#include "../define.h"
 
 #ifdef __USE_CURL__
 extern "C" {

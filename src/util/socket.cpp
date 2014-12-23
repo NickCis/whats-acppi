@@ -102,12 +102,15 @@ ssize_t Socket::recv(char* buf, size_t len){
 	return ::recv(this->sock, (void*) buf, len, 0);
 }
 
-vector<char> Socket::recv(size_t len){
-	vector<char> ret;
-	ret.reserve(len);
+#include <iostream>
 
-	ssize_t readSize = this->recv(ret.data(), len);
-	ret.resize(readSize);
+ssize_t Socket::recv(vector<char>& out, size_t len){
+	out.resize(0);
+	out.reserve(len);
 
-	return ret;
+	ssize_t readSize = this->recv(out.data(), len);
+	if(readSize > 0)
+		out.resize(readSize);
+
+	return readSize;
 }

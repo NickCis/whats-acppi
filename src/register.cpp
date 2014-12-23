@@ -1,23 +1,14 @@
 #include "register.h"
+#include "define.h"
+#include "util/log.h"
 #include "util/sha1.h"
 #include "util/base64.h"
 #include "util/request.h"
 #include "util/json.h"
 
-#include <iostream>
 #include <vector>
 #include <string>
 #include <sstream>
-
-#define TOKEN_SIGNATURE "MIIDMjCCAvCgAwIBAgIETCU2pDALBgcqhkjOOAQDBQAwfDELMAkGA1UEBhMCVVMxEzARBgNVBAgTCkNhbGlmb3JuaWExFDASBgNVBAcTC1NhbnRhIENsYXJhMRYwFAYDVQQKEw1XaGF0c0FwcCBJbmMuMRQwEgYDVQQLEwtFbmdpbmVlcmluZzEUMBIGA1UEAxMLQnJpYW4gQWN0b24wHhcNMTAwNjI1MjMwNzE2WhcNNDQwMjE1MjMwNzE2WjB8MQswCQYDVQQGEwJVUzETMBEGA1UECBMKQ2FsaWZvcm5pYTEUMBIGA1UEBxMLU2FudGEgQ2xhcmExFjAUBgNVBAoTDVdoYXRzQXBwIEluYy4xFDASBgNVBAsTC0VuZ2luZWVyaW5nMRQwEgYDVQQDEwtCcmlhbiBBY3RvbjCCAbgwggEsBgcqhkjOOAQBMIIBHwKBgQD9f1OBHXUSKVLfSpwu7OTn9hG3UjzvRADDHj+AtlEmaUVdQCJR+1k9jVj6v8X1ujD2y5tVbNeBO4AdNG/yZmC3a5lQpaSfn+gEexAiwk+7qdf+t8Yb+DtX58aophUPBPuD9tPFHsMCNVQTWhaRMvZ1864rYdcq7/IiAxmd0UgBxwIVAJdgUI8VIwvMspK5gqLrhAvwWBz1AoGBAPfhoIXWmz3ey7yrXDa4V7l5lK+7+jrqgvlXTAs9B4JnUVlXjrrUWU/mcQcQgYC0SRZxI+hMKBYTt88JMozIpuE8FnqLVHyNKOCjrh4rs6Z1kW6jfwv6ITVi8ftiegEkO8yk8b6oUZCJqIPf4VrlnwaSi2ZegHtVJWQBTDv+z0kqA4GFAAKBgQDRGYtLgWh7zyRtQainJfCpiaUbzjJuhMgo4fVWZIvXHaSHBU1t5w//S0lDK2hiqkj8KpMWGywVov9eZxZy37V26dEqr/c2m5qZ0E+ynSu7sqUD7kGx/zeIcGT0H+KAVgkGNQCo5Uc0koLRWYHNtYoIvt5R3X6YZylbPftF/8ayWTALBgcqhkjOOAQDBQADLwAwLAIUAKYCp0d6z4QQdyN74JDfQ2WCyi8CFDUM4CaNB+ceVXdKtOrNTQcc0e+t"
-
- // 2.11.473
-#define CLASSES_MD5 "2BemshOrsTglFob3C6No8w=="
-
-#define KEY2 "/UIGKU1FVQa+ATM2A0za7G2KI9S/CwPYjgAbc67v7ep42eO/WeTLx1lb1cHwxpsEgF4+PmYpLd2YpGUdX/A2JQitsHzDwgcdBpUf7psX1BU="
-
-#define WHATSAPP_REQUEST_HOST "v.whatsapp.net/v2/code"
-#define WHATSAPP_REGISTER_HOST "v.whatsapp.net/v2/register"
 
 using std::vector;
 using std::string;
@@ -25,6 +16,7 @@ using std::stringstream;
 
 using WhatsAcppi::Register;
 using WhatsAcppi::Phone;
+using WhatsAcppi::Util::Log;
 using WhatsAcppi::Util::sha1;
 using WhatsAcppi::Util::Request;
 using WhatsAcppi::Util::base64_encode;
@@ -66,6 +58,10 @@ int Register::codeRequest(const string& method){
 
 	this->st = REGISTER_CODE_REQUESTED;
 
+	Log() << " == req.getData() == ";
+	Log() << req.getData();
+	Log() << " =================== ";
+
 	simpleJsonParser(req.getData(), [this, &ret] (const stringstream &name, stringstream &value){
 		const string& n = name.str();
 		if(n == "status"){
@@ -80,8 +76,8 @@ int Register::codeRequest(const string& method){
 			value >> retryAfter;
 		} else if(n == "length"){
 		} else if(n == "method"){
-		} else{ // XXX: use log
-			std::cout << "Unknown name: \"" << n << "\": " << value.str() << std::endl;
+		} else{
+			Log(Log::WarningMsg) << "Unknown name: \"" << n << "\": " << value.str();
 		}
 	});
 
@@ -128,8 +124,8 @@ int Register::codeRegister(const string& code){
 		} else if(n == "cost"){
 		} else if(n == "currency"){
 		} else if(n == "price_expiration"){
-		} else{ // XXX: use log
-			std::cout << "Unknown name: \"" << n << "\": " << value.str() << std::endl;
+		} else{
+			Log(Log::WarningMsg) << "Unknown name: \"" << n << "\": " << value.str();
 		}
 	});
 
