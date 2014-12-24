@@ -26,6 +26,8 @@ namespace WhatsAcppi {
 				const std::shared_ptr<std::vector<char>>& getData() const;
 				operator bool() const;
 
+				std::string toString(const std::string& sep="") const;
+
 			protected:
 				std::string tag;
 				std::map<std::string, std::string> attributes;

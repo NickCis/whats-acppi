@@ -17,19 +17,19 @@ namespace WhatsAcppi {
 				Node nextTreeInternal(const std::vector<char> & data);
 				/** Methods for peeking data
 				 */
-				int peek24(const std::vector<char>& data, int offset = 0) const;
-				int peek16(const std::vector<char>& data,int offset = 0) const;
-				int peek8(const std::vector<char>& data,int offset = 0) const;
+				unsigned int peek24(const std::vector<char>& data, unsigned int offset = 0) const;
+				unsigned int peek16(const std::vector<char>& data, unsigned int offset = 0) const;
+				unsigned char peek8(const std::vector<char>& data, unsigned int offset = 0) const;
 
 				/** Methods for reading data, (they increment the counter)
 				 */
-				int read24(const std::vector<char>& data);
-				int read16(const std::vector<char>& data);
-				int read8(const std::vector<char>& data);
+				unsigned int read24(const std::vector<char>& data);
+				unsigned int read16(const std::vector<char>& data);
+				unsigned char read8(const std::vector<char>& data);
 
 				/** Reads 'string' from data according to the token
 				 */
-				std::vector<char> readString(const std::vector<char>& data, int token);
+				std::vector<char> readString(const std::vector<char>& data, unsigned int token);
 
 				/** Reads len from data (increments counter);
 				 * @param data

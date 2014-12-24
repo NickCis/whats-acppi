@@ -1,9 +1,18 @@
 #include "node.h"
 
+#include <sstream>
+#include <iomanip>
+#include <iostream>
+
 using std::map;
+using std::hex;
+using std::endl;
+using std::setw;
 using std::string;
 using std::vector;
+using std::setfill;
 using std::shared_ptr;
+using std::stringstream;
 
 using WhatsAcppi::Protocol::Node;
 
@@ -61,4 +70,28 @@ const string Node::getAttribute(const string& name) const {
 		return string();
 
 	return it->second;
+}
+
+string Node::toString(const std::string& sep) const {
+	stringstream ss;
+	ss << sep << '<' << this->getTag();
+
+	for(auto it=this->attributes.begin(); it != this->attributes.end(); it++)
+		ss << ' ' << it->first << "=\"" << it->second << "\"";
+
+	ss << '>' << endl;
+
+	for(auto it=this->children.begin(); it != this->children.end(); it++)
+		ss << (*it)->toString(sep+"  ") << endl;
+
+	if(this->data){
+		ss << sep << ' ';
+		for(auto it=this->data->begin(); it != this->data->end(); it++)
+			ss << ' ' << setfill('0') << setw(2) << hex << (unsigned int) ((unsigned char) (*it));
+		ss << endl;
+	}
+
+	ss << sep << "</" << this->getTag() << '>';
+
+	return ss.str();
 }

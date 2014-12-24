@@ -3,11 +3,13 @@
 #include <memory>
 
 #include "token_map.h"
+#include "../util/log.h"
 
 using std::vector;
 using std::string;
 using std::shared_ptr;
 
+using WhatsAcppi::Util::Log;
 using WhatsAcppi::Protocol::Node;
 using WhatsAcppi::Protocol::getToken;
 using WhatsAcppi::Protocol::KeyStream;
@@ -23,8 +25,10 @@ Node BinTreeNodeReader::nextTree(vector<char>& data, KeyStream* key){
 	int stanzaFlag = (this->peek8(data)  & 0xF0) >> 4;
 	size_t stanzaSize = this->peek16(data, 1) | ((this->peek8(data) & 0x0F) << 16);
 
-	if(stanzaSize > data.size()) // TODO: error
+	if(stanzaSize > data.size()){ // TODO: error
+		Log() << "Incomplete Node. stanzaSize [" << stanzaSize << "] > data.size() [" << data.size() << ']';
 		return Node();
+	}
 
 	this->read24(data);
 
@@ -33,19 +37,18 @@ Node BinTreeNodeReader::nextTree(vector<char>& data, KeyStream* key){
 			int realSize = stanzaSize - 4;
 			key->decodeMessage(data, realSize, 0, realSize);
 		}else{ // XXX: Error
+			Log(Log::WarningMsg) << __func__ << " :: stanzaFlag & 1 -> true, but key isn't set! stanzaFlag: " << stanzaFlag;
 		}
 	}
 
-	if(stanzaSize > 0){
-		// TODO
+	if(stanzaSize > 0)
 		return this->nextTreeInternal(data);
-	}
 
 	return Node();
 }
 
 Node BinTreeNodeReader::nextTreeInternal(const vector<char> & data){
-	int token = this->read8(data);
+	unsigned int token = this->read8(data);
 	int size = this->readListSize(data, token);
 	Node node;
 	token = this->read8(data);
@@ -54,6 +57,7 @@ Node BinTreeNodeReader::nextTreeInternal(const vector<char> & data){
 		this->readAttributes(data, size, node);
 		return node;
 	}else if(token == 2){ // TODO: error
+		Log() << __func__ << " :: token == 2. Return null node";
 		return node;
 	}
 
@@ -87,9 +91,11 @@ bool BinTreeNodeReader::isListTag(int token){
 	return ((token == 248) || (token == 0) || (token == 249));
 }
 
-vector<char> BinTreeNodeReader::readString(const vector<char>&data, int token){
-	if(token == -1) // TODO: ERROR
+vector<char> BinTreeNodeReader::readString(const vector<char>&data, unsigned int token){
+	if(token == ((unsigned int) -1)){ // TODO: ERROR
+		Log(Log::WarningMsg) << __func__ << " :: known token val: " << token;
 		return vector<char>();
+	}
 
 	if( (token > 2) && (token < 0xF5)){
 		string t = this->getToken(data, token);
@@ -119,18 +125,18 @@ vector<char> BinTreeNodeReader::readString(const vector<char>&data, int token){
 }
 
 vector<char> BinTreeNodeReader::readNibble(const vector<char>& data){
-	int byte = this->read8(data);
-	int ignoreLastNibble =  !!(byte & 0x80);
-	int size = byte & 0x7F;
-	int nrOfNibbles = size * 2 - ignoreLastNibble;
+	unsigned int byte = this->read8(data);
+	unsigned int ignoreLastNibble =  !!(byte & 0x80);
+	unsigned int size = byte & 0x7F;
+	unsigned int nrOfNibbles = size * 2 - ignoreLastNibble;
 
 	vector<char> d = this->fillArray(data, size);
 	vector<char> ret;
 
-	for(int i=0; i < nrOfNibbles; i++){
+	for(unsigned int i=0; i < nrOfNibbles; i++){
 		byte = data[i/2];
-		int shift = 4 * (1 - i %2);
-		int decimal = (byte & (15 << shift)) >> shift;
+		unsigned int shift = 4 * (1 - i %2);
+		unsigned int decimal = (byte & (15 << shift)) >> shift;
 		switch(decimal){
 			case 0:
 			case 1:
@@ -149,6 +155,7 @@ vector<char> BinTreeNodeReader::readNibble(const vector<char>& data){
 				ret.push_back(decimal - 10 + 45);
 				break;
 			default: // TODO: error
+				Log(Log::WarningMsg) << __func__ << " :: unknown decimal: " << decimal;
 				break;
 		}
 	}
@@ -182,7 +189,8 @@ void BinTreeNodeReader::readAttributes(const vector<char>& data, int size, Node 
 	int attrCount = (size -2 + size % 2) / 2;
 
 	for(int i =0; i < attrCount; i++){
-		node.setAttribute(this->readString(data, this->read8(data)), this->readString(data, this->read8(data)));
+		vector<char> key = this->readString(data, this->read8(data));
+		node.setAttribute(key, this->readString(data, this->read8(data)));
 	}
 }
 
@@ -193,43 +201,48 @@ int BinTreeNodeReader::readListSize(const vector<char> & data, int token){
 	}else if(token == 0xF9){
 		size = this->read16(data);
 	}else{ // TODO: error
+		Log(Log::WarningMsg) << __func__ << " :: unknown token value: " << token;
 	}
 
 	return size;
 }
 
-int BinTreeNodeReader::read8(const vector<char> &data){
-	int ret = this->peek8(data);
+unsigned char BinTreeNodeReader::read8(const vector<char> &data){
+	unsigned char ret = this->peek8(data);
 	pos++;
 	return ret;
 }
 
-int BinTreeNodeReader::read16(const vector<char> &data){
-	int ret = this->peek16(data);
+unsigned int BinTreeNodeReader::read16(const vector<char> &data){
+	unsigned int ret = this->peek16(data);
 	pos += 2;
 	return ret;
 }
 
-int BinTreeNodeReader::read24(const vector<char> &data){
-	int ret = this->peek24(data);
+unsigned int BinTreeNodeReader::read24(const vector<char> &data){
+	unsigned int ret = this->peek24(data);
 	pos += 3;
 	return ret;
 }
 
-int BinTreeNodeReader::peek8(const vector<char> &data, int offset) const{
+unsigned char BinTreeNodeReader::peek8(const vector<char> &data, unsigned int offset) const{
 	return data[offset+pos];
 }
 
-int BinTreeNodeReader::peek16(const vector<char> &data, int offset) const{
-	if(!data.size() >= pos+offset+2) // TODO: error
+unsigned int BinTreeNodeReader::peek16(const vector<char> &data, unsigned int offset) const{
+	if(!data.size() >= pos+offset+2){ // TODO: error
+		Log(Log::WarningMsg) << __func__ << " :: buffer is too small data.size() " << data.size() << " needed " << (pos+offset+2);
 		return 0;
+	}
 
 	return (data[pos+offset] << 8) | (data[pos+offset+1]);
 }
 
-int BinTreeNodeReader::peek24(const vector<char> &data, int offset) const{
-	if(!data.size() >= pos+offset+3) // TODO: error
+unsigned int BinTreeNodeReader::peek24(const vector<char> &data, unsigned int offset) const{
+	if(!data.size() >= pos+offset+3){ // TODO: error
+		Log(Log::WarningMsg) << __func__ << " :: buffer is too small data.size() " << data.size() << " needed " << (pos+offset+3);
 		return 0;
+	}
 
 	return (this->peek16(data, offset) << 8) | this->peek8(data, offset+2);
 }

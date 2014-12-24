@@ -30,7 +30,6 @@ void BinTreeNodeWriter::streamStart(const string& domain, const string& resource
 	this->write8(5); // 0x05
 
 	size_t headerPos = this->data.size(); // Es fija? 4?
-	Log() << "headerPos " << headerPos;
 	this->write24(0); // -> son 3 bytes
 
 	std::map<std::string, std::string> attributes;
@@ -69,8 +68,6 @@ void BinTreeNodeWriter::writeString(const string& tag){
 	int token;
 	bool secondary;
 	token = tryGetToken(tag, secondary);
-
-	Log() << "tag " << tag << " token " << token;
 
 	if(token >= 0){
 		if(secondary)

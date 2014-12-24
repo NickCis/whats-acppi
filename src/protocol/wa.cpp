@@ -59,32 +59,33 @@ int WA::doLogin(){
 	BinTreeNodeWriter writer;
 
 	writer.streamStart(WHATSAPP_SERVER, ss.str());
-	Log() << "streamStart :: size " << writer.getData().size();
-	Log() << writer.getData();
+	Log() << __func__ << " :: streamStart :: writer.size() " << writer.getData().size() << " writer.data() " << writer.getData();
 	this->sock.write(writer.getData());
 
 	Node featuresNode = this->createFeaturesNode();
 	writer.write(featuresNode);
-	Log() << "featuresNode :: size " << writer.getData().size();
-	Log() << writer.getData();
+	Log() << __func__ << " :: featuresNode :: writer.size() " << writer.getData().size() << " writer.data() " << writer.getData();
+	Log() << featuresNode.toString();
 	this->sock.write(writer.getData());
 
 	Node auth = this->createAuthNode();
 	writer.write(auth);
-	Log() << "authNode :: size " << writer.getData().size();
-	Log() << writer.getData();
+	Log() << __func__ << " :: authNode :: writer.size() " << writer.getData().size() << " writer.data() " << writer.getData();
+	Log() << auth.toString();
 	this->sock.write(writer.getData());
 
-	Log() << "Polling messages";
 
 	if(!this->pollMessage())
-		Log() << "Error 1";
+		Log(Log::WarningMsg) << "Error 1";
 
 	if(!this->pollMessage())
-		Log() << "Error 2";
+		Log(Log::WarningMsg) << "Error 2";
 
 	if(!this->pollMessage())
-		Log() << "Error 3";
+		Log(Log::WarningMsg) << "Error 3";
+
+
+	// TODO: createAuthResponse!
 
 	return 0;
 }
@@ -150,10 +151,11 @@ shared_ptr<vector<char>> WA::createAuthBlob(){
 
 vector<char> WA::readStanza(){
 	vector<char> output;
-	ssize_t sSize = this->sock.recv(output, 3);
-	Log() << "sSize " << sSize;
+	this->sock.recv(output, 3);
 
 	if(output.size() != 3){ // TODO: error
+		Log(Log::WarningMsg) << __func__ << " :: Error reding stanza. size: " << output.size();
+		Log() << output;
 		return vector<char>();
 	}
 
@@ -161,14 +163,10 @@ vector<char> WA::readStanza(){
 	treeLength |= output[1] << 8;
 	treeLength |= output[2] << 0;
 
-	Log() << "output[0] " << output[0];
-	Log() << "output[1] " << output[1];
-	Log() << "output[2] " << output[2];
-
-	Log() << "treeLength " << treeLength;
-
 	ssize_t readSize = this->sock.recv(output, treeLength);
 	if(readSize <= 0){ // TODO: error
+		Log(Log::WarningMsg) << __func__ << " :: Error. readSize: " << readSize;
+		return vector<char>();
 	}
 
 	while(output.size() < treeLength){
@@ -176,6 +174,7 @@ vector<char> WA::readStanza(){
 		ssize_t readSize = this->sock.recv(output, toRead);
 
 		if(readSize <= 0){ // TODO: error
+			Log(Log::WarningMsg) << "Error. while: readSize: " << readSize;
 			break;
 		}
 	}
@@ -186,8 +185,6 @@ vector<char> WA::readStanza(){
 bool WA::pollMessage(bool autoReceipt, ProcessType type){
 	vector<char> stanza = this->readStanza();
 	if(stanza.size() > 0){
-		Log() << "stanza size " << stanza.size();
-		Log() << stanza;
 		this->processInboundData(stanza, autoReceipt, type);
 		return true;
 	}
@@ -197,17 +194,18 @@ bool WA::pollMessage(bool autoReceipt, ProcessType type){
 void WA::processInboundData(std::vector<char>& data, bool autoReceipt, ProcessType type){
 	BinTreeNodeReader reader;
 
+	Log() << "Msg arrive - size: " << data.size() << " data: " << data;
+
 	Node node = reader.nextTree(data, inputKey ? inputKey.get() : NULL);
 	if(node){
 		this->processInboundDataNode(node, autoReceipt, type);
+	}else{
+		Log() << "Invalid node";
 	}
 }
 
 void WA::processInboundDataNode(Node &node, bool autoReceipt, ProcessType type){
-	Log() << "Llego node -> tag: " << node.getTag();
-	Log() << "id: " << node.getTag();
-	Log() << "data:";
-	Log() << node.getData();
+	Log() << node.toString();
 
 	// TODO: implement handlers!
 	if(node.getTag() == "challenge"){

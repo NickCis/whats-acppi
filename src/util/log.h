@@ -3,6 +3,7 @@
 
 #include <sstream>
 #include <vector>
+#include <iomanip>
 
 namespace WhatsAcppi {
 	namespace Util {
@@ -21,7 +22,7 @@ namespace WhatsAcppi {
 				Log &operator<<(const std::vector<char> &v){
 					if(Log::logLevel <= this->level)
 						for(auto it = v.begin(); it != v.end(); it++)
-							this->ss << *it;
+							this->ss << std::setfill('0') << std::setw(2) << std::hex << (unsigned int) ((unsigned char) (*it));
 
 					return *this;
 				}
