@@ -6,18 +6,22 @@ using std::string;
 
 using WhatsAcppi::Util::sha1;
 
+#define HMAC_SHA1_BLOCK_SIZE 64
+
 vector<char> WhatsAcppi::Util::hmac_sha1(const char* key, size_t keySize, const char* data, size_t size){
 	vector<char> myKey;
+	myKey.reserve(HMAC_SHA1_BLOCK_SIZE);
 
-	if(keySize > SHA1_BIN_LENGTH)
+	if(keySize > HMAC_SHA1_BLOCK_SIZE){
 		myKey = sha1(key, keySize);
-	else if(keySize < SHA1_BIN_LENGTH){
-		myKey.reserve(SHA1_BIN_LENGTH);
-		myKey.insert(myKey.begin(), key, key+keySize);
-		int max = SHA1_BIN_LENGTH - keySize;
-		for(int i=0; i < max; i++)
-			myKey.push_back(0);
+	}else{
+		myKey.resize(0);
+		myKey.insert(myKey.end(), key, key+keySize);
 	}
+
+	for(size_t i=keySize; i < HMAC_SHA1_BLOCK_SIZE; i++)
+		myKey.push_back(0);
+
 
 	vector<char> opad;
 	vector<char> ipad;
@@ -36,4 +40,12 @@ vector<char> WhatsAcppi::Util::hmac_sha1(const char* key, size_t keySize, const 
 	opad.insert(opad.end(), ipadSha1.begin(), ipadSha1.end());
 
 	return sha1(opad);
+}
+
+vector<char> WhatsAcppi::Util::hmac_sha1(const std::vector<char> &key, const std::vector<char> &data){
+	return WhatsAcppi::Util::hmac_sha1(key.data(), key.size(), data.data(), data.size());
+}
+
+vector<char> WhatsAcppi::Util::hmac_sha1(const string &key, const string &data){
+	return WhatsAcppi::Util::hmac_sha1(key.data(), key.size(), data.data(), data.size());
 }
