@@ -2,6 +2,7 @@
 #include <string>
 #include <memory>
 #include "../../src/util/log.h"
+#include "../../src/util/rc4.h"
 #include "../../src/util/sha1.h"
 #include "../../src/util/util.h"
 #include "../../src/util/base64.h"
@@ -17,6 +18,7 @@ using std::vector;
 using std::shared_ptr;
 
 using WhatsAcppi::Util::Log;
+using WhatsAcppi::Util::Rc4;
 using WhatsAcppi::Util::sha1;
 using WhatsAcppi::Util::pbkdf2;
 using WhatsAcppi::Util::hex2bin;
@@ -57,8 +59,32 @@ int main(/*int argc, char*argv[]*/){
 
 	vector<shared_ptr<vector<char>>> keys = KeyStream::generateKeys(password, nonce);
 	int i = 0;
-	for(auto it = keys.begin(); it != keys.end(); it++)
-		Log() << "key" << i << ": " << (*(*it)) << " -> expected: " << keys_expected[i++];
+	for(auto it = keys.begin(); it != keys.end(); it++){
+		Log() << "key" << i << ": " << (*(*it)) << " -> expected: " << keys_expected[i];
+		i++;
+	}
+
+	const string keyPlain = "Key";
+	Rc4 rc4_plain(keyPlain.data(), keyPlain.size(), 0);
+	string plainText_str =  "Plaintext";
+	vector<char> plainText;
+	plainText.insert(plainText.end(), plainText_str.begin(), plainText_str.end());
+	auto plainTextSize = plainText.size();
+	rc4_plain.cipher(plainText.data(), 0, plainText.size());
+	Log() << "rc4.cipher( plainText, 0, " << plainTextSize << "): " << plainText << " -> expected: bbf316e8d940af0ad3";
+
+	Rc4 rc4(keys[0]->data(), keys[0]->size(), 0x300);
+	vector<char> cipherNonce = nonce;
+	Log() << "nonce: " << cipherNonce;
+	auto nonceSize = cipherNonce.size();
+	rc4.cipher(cipherNonce.data(), 0, cipherNonce.size());
+	Log() << "rc4.cipher( nonce, 0, " << nonceSize << "): " << cipherNonce << " -> expected: 6a13997daa9be36294ac7c5851483570737e8a22";
+
+	KeyStream outputKey(keys[0], keys[1]);
+	vector<char> message = hex2bin("00000000353431313335363833303132b58a99f63c335469f45d1305688ddb5b32492e4a");
+	Log() << "message: " << message;
+	outputKey.encodeMessage(message, 0, 4, message.size() -4);
+	Log() << "message encoded: " << message;
 
 	return 0;
 }

@@ -27,6 +27,14 @@ namespace WhatsAcppi {
 					return *this;
 				}
 
+				Log &operator<<(const std::vector<unsigned char> &v){
+					if(Log::logLevel <= this->level)
+						for(auto it = v.begin(); it != v.end(); it++)
+							this->ss << std::setfill('0') << std::setw(2) << std::hex << (unsigned int) (*it);
+
+					return *this;
+				}
+
 				template<typename T>
 				Log &operator<<(const T &t){
 					if(Log::logLevel <= this->level)

@@ -4,7 +4,6 @@
 #include <vector>
 #include <memory>
 
-#define RC4_S_LENGTH (0x100)
 
 namespace WhatsAcppi {
 	namespace Util {
@@ -15,9 +14,9 @@ namespace WhatsAcppi {
 				void cipher(std::vector<char> &data);
 
 			protected:
-				int s[RC4_S_LENGTH];
-				int i;
-				int j;
+				void swap(unsigned int i, unsigned int j);
+				std::vector<unsigned char> s;
+				unsigned int i, j;
 		};
 	}
 }
