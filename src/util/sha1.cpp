@@ -1,4 +1,5 @@
 #include "sha1.h"
+#include "util.h"
 
 #ifdef __USE_OPENSSL__
 #include <openssl/sha.h>
@@ -6,6 +7,8 @@
 
 using std::vector;
 using std::string;
+
+using WhatsAcppi::Util::bin2hex;
 
 #ifdef __USE_OPENSSL__
 vector<char> WhatsAcppi::Util::sha1(const char* data, size_t size){
@@ -18,13 +21,7 @@ vector<char> WhatsAcppi::Util::sha1(const char* data, size_t size){
 #endif
 
 string WhatsAcppi::Util::sha1Str(const char* data, size_t size){
-	vector<char> sha = WhatsAcppi::Util::sha1(data, size);
-	char out[SHA1_STR_LENGTH + 1];
-	out[SHA1_STR_LENGTH] = 0;
-	for(int i=0; i < SHA1_BIN_LENGTH; i++)
-		snprintf(out+i*2, 3, "%02x", sha[i]);
-
-	return string(out);
+	return bin2hex(WhatsAcppi::Util::sha1(data, size));
 }
 
 vector<char> WhatsAcppi::Util::sha1(vector<char> const& data){

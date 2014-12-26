@@ -5,7 +5,7 @@
 
 namespace WhatsAcppi {
 	namespace Util {
-		std::vector<char> pkbdf2(const std::vector<char>& password, const std::vector<char>& salt, int iterations);
+		std::vector<char> pbkdf2(const std::vector<char>& password, const std::vector<char>& salt, int iterations);
 	}
 }
 #endif

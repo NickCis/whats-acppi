@@ -25,16 +25,20 @@ namespace WhatsAcppi {
 
 			protected:
 				typedef enum {
-					DATA_READ=0,
-					DATA_WRITE
+					DataRead=0,
+					DataWrite
 				} ProcessType;
+
 				Node createFeaturesNode();
 				Node createAuthNode();
+				Node createAuthResponseNode();
+
 				int doLogin();
+				void authenticate();
 				std::vector<char> readStanza();
-				bool pollMessage(bool autoReceipt=true, ProcessType type=DATA_READ);
+				bool pollMessage(bool autoReceipt=true, ProcessType type=DataRead);
 				void processInboundData(std::vector<char>& data, bool autoReceipt, ProcessType type);
-				void processInboundDataNode(Node &node, bool autoReceipt, ProcessType type);
+				void processInboundDataNode(const Node &node, bool autoReceipt, ProcessType type);
 
 				const Phone& phone;
 				const std::string& identity;

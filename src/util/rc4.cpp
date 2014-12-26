@@ -23,7 +23,6 @@ Rc4::Rc4(const char *key, size_t size, int drop){
 }
 
 void Rc4::cipher(char *data, size_t offset, size_t length){
-	int i, j;
 	while (length-- != 0) {
 		i = (i + 1) % 0x100;
 		j = (j + s[i]) % 0x100;

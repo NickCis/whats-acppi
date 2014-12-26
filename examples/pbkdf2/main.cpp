@@ -1,83 +1,35 @@
 #include <iostream>
 #include <string>
+#include <memory>
 #include "../../src/util/log.h"
 #include "../../src/util/sha1.h"
 #include "../../src/util/util.h"
 #include "../../src/util/base64.h"
 #include "../../src/util/pbkdf2.h"
 #include "../../src/util/hmac_sha1.h"
+#include "../../src/protocol/key_stream.h"
 
 using std::cout;
 using std::cin;
 using std::endl;
 using std::string;
 using std::vector;
+using std::shared_ptr;
 
 using WhatsAcppi::Util::Log;
 using WhatsAcppi::Util::sha1;
 using WhatsAcppi::Util::pbkdf2;
+using WhatsAcppi::Util::hex2bin;
 using WhatsAcppi::Util::hmac_sha1;
 using WhatsAcppi::Util::base64_decode;
+using WhatsAcppi::Protocol::KeyStream;
 
-char getBinVal(char c){
-	switch(c){
-		case '0':
-			return 0;
-		case '1':
-			return 1;
-		case '2':
-			return 2;
-		case '3':
-			return 3;
-		case '4':
-			return 4;
-		case '5':
-			return 5;
-		case '6':
-			return 6;
-		case '7':
-			return 7;
-		case '8':
-			return 8;
-		case '9':
-			return 9;
-		case 'a':
-		case 'A':
-			return 10;
-		case 'b':
-		case 'B':
-			return 11;
-		case 'c':
-		case 'C':
-			return 12;
-		case 'd':
-		case 'D':
-			return 13;
-		case 'e':
-		case 'E':
-			return 14;
-		case 'f':
-		case 'F':
-			return 15;
-		default:
-			return 0;
-	}
-}
-
-vector<char> hex2bin(const string &hex){
-	vector<char> ret;
-	if(hex.size() % 2)
-		return vector<char>();
-
-	ret.reserve(hex.size()/2);
-
-	for(size_t i=0; i < hex.size(); i+=2){
-		char c = getBinVal(hex[i]) * 16 + getBinVal(hex[i+1]);
-		ret.push_back(c);
-	}
-
-	return ret;
-}
+const char *keys_expected[] = {
+	"ff0f083bb974fa9411b865b53098bec671689ee0",
+	"35f181b39a8bc37805ac4ce1725197e80789f4fc",
+	"208d1f7e29359500aeefb502dc566f5dc53376e0",
+	"4b1c1e4ac9cd2a1e1087b0905492a7a6eed98e65"
+};
 
 int main(/*int argc, char*argv[]*/){
 	WhatsAcppi::Util::Init init;
@@ -94,30 +46,19 @@ int main(/*int argc, char*argv[]*/){
 	Log() << "nonce: " << nonce;
 
 	vector<char> sha1Nonce = sha1(nonce);
-	Log() << "sha1Nonce: " << sha1Nonce;
+	Log() << "sha1Nonce: " << sha1Nonce << " -> expected:  2432351e81c9fe124cd3eec2aea09777abea99d1";
 
 	vector<char> hmacNonce = hmac_sha1(password, nonce);
-	Log() << "hmacNonce: " << hmacNonce;
+	Log() << "hmacNonce: " << hmacNonce << " -> expected: 3817ae9676f11bdf16e0855229796946ef4af186";
 
-	Log() << "hmac empty: " << hmac_sha1("", "");
+	Log() << "hmac empty: " << hmac_sha1("", "") << " -> expected: fbdb1d1b18aa6c08324b7d64b71fb76370690e1d"; 
 
-	nonce.push_back(0);
+	Log() << "pbkdf2(nonce): " << pbkdf2(password, nonce, 2) << " -> expected: 50ca64bfbb369e3b6b24ee954b720b4b3a575ba6";
 
-	nonce.back() = '1';
-	vector<char> key1 = pbkdf2(password, nonce, 2);
-	Log() << "key0: " << key1;
-
-	nonce.back() = '2';
-	vector<char> key2 = pbkdf2(password, nonce, 2);
-	Log() << "key1: " << key2;
-
-	nonce.back() = '3';
-	vector<char> key3 = pbkdf2(password, nonce, 2);
-	Log() << "key2: " << key3;
-
-	nonce.back() = '4';
-	vector<char> key4 = pbkdf2(password, nonce, 2);
-	Log() << "key3: " << key4;
+	vector<shared_ptr<vector<char>>> keys = KeyStream::generateKeys(password, nonce);
+	int i = 0;
+	for(auto it = keys.begin(); it != keys.end(); it++)
+		Log() << "key" << i << ": " << (*(*it)) << " -> expected: " << keys_expected[i++];
 
 	return 0;
 }

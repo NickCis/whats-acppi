@@ -22,7 +22,7 @@ using std::stringstream;
 
 using WhatsAcppi::Phone;
 using WhatsAcppi::Util::Log;
-using WhatsAcppi::Util::pkbdf2;
+using WhatsAcppi::Util::pbkdf2;
 using WhatsAcppi::Util::base64_decode;
 using WhatsAcppi::Protocol::WA;
 using WhatsAcppi::Protocol::Node;
@@ -86,6 +86,16 @@ int WA::doLogin(){
 
 
 	// TODO: createAuthResponse!
+	if(this->challengeData){
+		Node authResponseNode = this->createAuthResponseNode();
+		writer.write(authResponseNode);
+		Log() << __func__ << " :: authResponseNode :: writer.size() " << writer.getData().size() << " writer.data() " << writer.getData();
+		Log() << authResponseNode.toString();
+		this->sock.write(writer.getData());
+
+		if(!this->pollMessage())
+			Log(Log::WarningMsg) << "Error polling challengeResponse";
+	}
 
 	return 0;
 }
@@ -115,7 +125,7 @@ Node WA::createAuthNode(){
 shared_ptr<vector<char>> WA::createAuthBlob(){
 	shared_ptr<vector<char>> data;
 	if(this->challengeData && this->challengeData->size()){
-		vector<char> key = pkbdf2(base64_decode(this->password), *this->challengeData, 16);
+		vector<char> key = pbkdf2(base64_decode(this->password), *this->challengeData, 16);
 
 		inputKey = unique_ptr<KeyStream>(new KeyStream(key[2], key[3]));
 		outputKey = unique_ptr<KeyStream>(new KeyStream(key[0], key[1]));
@@ -204,7 +214,7 @@ void WA::processInboundData(std::vector<char>& data, bool autoReceipt, ProcessTy
 	}
 }
 
-void WA::processInboundDataNode(Node &node, bool autoReceipt, ProcessType type){
+void WA::processInboundDataNode(const Node &node, bool autoReceipt, ProcessType type){
 	Log() << node.toString();
 
 	// TODO: implement handlers!
@@ -213,4 +223,30 @@ void WA::processInboundDataNode(Node &node, bool autoReceipt, ProcessType type){
 	} else if(node.getTag() == "success"){
 		this->challengeData = node.getData();
 	}
+}
+
+void WA::authenticate(){
+	auto keys = KeyStream::generateKeys(base64_decode(this->password), *this->challengeData);
+	this->inputKey = unique_ptr<KeyStream>(new KeyStream(keys[2], keys[3]));
+	this->outputKey = unique_ptr<KeyStream>(new KeyStream(keys[0], keys[1]));
+}
+
+Node WA::createAuthResponseNode(){
+	this->authenticate();
+	shared_ptr<vector<char>> data(new vector<char>);
+	data->reserve(4+this->phone.getPhoneNumber().size()+this->challengeData->size());
+	data->resize(4);
+	(*data)[0] = 0;
+	(*data)[1] = 0;
+	(*data)[2] = 0;
+	(*data)[3] = 0;
+	data->insert(data->end(), this->phone.getPhoneNumber().begin(), this->phone.getPhoneNumber().end());
+	data->insert(data->end(), this->challengeData->begin(), this->challengeData->end());
+
+	//this->outputKey->encodeMessage(*data, 0, 4, data->size()-4);
+
+	Node authResponseNode("response");
+	authResponseNode.setData(data);
+
+	return authResponseNode;
 }
