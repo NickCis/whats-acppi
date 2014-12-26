@@ -58,9 +58,7 @@ int Register::codeRequest(const string& method){
 
 	this->st = REGISTER_CODE_REQUESTED;
 
-	Log() << " == req.getData() == ";
-	Log() << req.getData();
-	Log() << " =================== ";
+	Log() << __func__ << " :: req.getData(): " << Log::VectorStr(req.getData());
 
 	simpleJsonParser(req.getData(), [this, &ret] (const stringstream &name, stringstream &value){
 		const string& n = name.str();

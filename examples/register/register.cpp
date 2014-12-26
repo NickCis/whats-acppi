@@ -40,10 +40,11 @@ int main(int argc, char*argv[]){
 	PRINT(Iso639);
 	#undef PRINT
 
-	cout << "** Registering code" << endl;
-
 	string identity = sha1Str(argv[2]);
 	Register reg(phone, identity);
+	cout << "identity" << identity <<  endl;
+
+	cout << "** Registering code" << endl;
 
 	int ret = reg.codeRegister(argv[3]);
 	if(ret < 0){

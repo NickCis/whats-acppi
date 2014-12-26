@@ -34,6 +34,7 @@ int main(int argc, char*argv[]){
 	else
 		phone.guessPhoneInformation();
 
+
 	#define PRINT(X) cout << #X << ": " << phone.get##X() << endl
 	PRINT(PhoneNumber);
 	PRINT(Phone);
@@ -43,9 +44,10 @@ int main(int argc, char*argv[]){
 	PRINT(Iso639);
 	#undef PRINT
 
-	cout << "** Trying to login" << endl;
-
 	string identity = sha1Str(argv[2]);
+	cout << "identity: " << identity << endl;
+
+	cout << "** Trying to login" << endl;
 
 	WA wa(phone, identity, argv[2]);
 	wa.connect();
