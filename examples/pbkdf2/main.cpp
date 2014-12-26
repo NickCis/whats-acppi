@@ -82,9 +82,9 @@ int main(/*int argc, char*argv[]*/){
 
 	KeyStream outputKey(keys[0], keys[1]);
 	vector<char> message = hex2bin("00000000353431313335363833303132b58a99f63c335469f45d1305688ddb5b32492e4a");
-	Log() << "message: " << message;
+	Log() << "message (" << message.size() << "): " << message;
 	outputKey.encodeMessage(message, 0, 4, message.size() -4);
-	Log() << "message encoded: " << message;
+	Log() << "message encoded (" << message.size() << "): " << message << " -> expected: 64db21c6f2f3607bf2e73443e8cdd47b182e45d7d9954b7aeec56ff8f9b189f5fb0eed1b";
 
 	return 0;
 }

@@ -50,13 +50,17 @@ bool KeyStream::decodeMessage(vector<char>& buffer, int macOffset, int offset, i
 void KeyStream::encodeMessage(vector<char>& buffer, int macOffset, int offset, int length){
 	this->rc4.cipher(buffer.data(), offset, length);
 	vector<char> mac = this->computeMac(buffer, offset, length);
-	buffer.insert(buffer.begin()+macOffset, mac.begin(), mac.begin()+4);
+
+	//buffer.insert(buffer.begin()+macOffset, mac.begin(), mac.begin()+4);
+
+	for(int i=0 ; i < 4; i++)
+		buffer[macOffset+i] = mac[i];
 }
 
 vector<char> KeyStream::computeMac(const vector<char>& buffer, int offset, int length){
 	vector<char> output;
-	output.resize(buffer.size());
-	output.insert(output.begin(), buffer.begin()+offset, buffer.begin()+offset+length);
+	output.reserve(buffer.size()-offset);
+	output.insert(output.end(), buffer.begin()+offset, buffer.begin()+offset+length);
 	output.push_back(this->seq >> 24);
 	output.push_back(this->seq >> 16);
 	output.push_back(this->seq >> 8);

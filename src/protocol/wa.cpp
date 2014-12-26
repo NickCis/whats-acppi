@@ -243,11 +243,7 @@ Node WA::createAuthResponseNode(){
 	data->insert(data->end(), this->phone.getPhoneNumber().begin(), this->phone.getPhoneNumber().end());
 	data->insert(data->end(), this->challengeData->begin(), this->challengeData->end());
 
-	Log() << __func__ << " :: pre encodeMessage " << *data;
-
 	this->outputKey->encodeMessage(*data, 0, 4, data->size()-4);
-
-	Log() << __func__ << " :: pos encodeMessage " << *data;
 
 	Node authResponseNode("response");
 	authResponseNode.setData(data);
