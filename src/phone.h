@@ -33,7 +33,16 @@ namespace WhatsAcppi {
 			 */
 			void guessPhoneInformation(const std::string& carrier = std::string());
 
-			// TODO: add setters (to avoid automatic recongnition)
+			/**  Setters (see properties for description)
+			 */
+			void setCountry(const std::string& country);
+			void setCc(const std::string& cc);
+			void setPhoneNumber(const std::string& phoneNumber);
+			void setPhone(const std::string& phone);
+			void setMcc(const std::string& mcc);
+			void setIso3166(const std::string& iso3166);
+			void setIso639(const std::string& iso639);
+			void setMnc(const std::string& mnc);
 
 		protected:
 			std::string phoneNumber; // -> Phone number or username, country code + number without + or 00)

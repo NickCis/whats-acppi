@@ -85,3 +85,35 @@ const string& Phone::getIso639() const {
 const string& Phone::getMnc() const {
 	return this->mnc;
 }
+
+void Phone::setCountry(const std::string& country){
+	this->country = country;
+}
+
+void Phone::setCc(const std::string& cc){
+	this->cc = cc;
+}
+
+void Phone::setPhoneNumber(const std::string& phoneNumber){
+	this->phoneNumber = phoneNumber;
+}
+
+void Phone::setPhone(const std::string& phone){
+	this->phone = phone;
+}
+
+void Phone::setMcc(const std::string& mcc){
+	this->mcc = mcc;
+}
+
+void Phone::setIso3166(const std::string& iso3166){
+	this->iso3166 = iso3166;
+}
+
+void Phone::setIso639(const std::string& iso639){
+	this->iso639 = iso639;
+}
+
+void Phone::setMnc(const std::string& mnc){
+	this->mnc = mnc;
+}

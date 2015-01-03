@@ -35,7 +35,7 @@ Node BinTreeNodeReader::nextTree(vector<char>& data, KeyStream* key){
 	if(stanzaFlag & 8){
 		if(key){
 			int realSize = stanzaSize - 4;
-			key->decodeMessage(data, realSize, 0, realSize);
+			key->decodeMessage(data, realSize, 3, realSize);
 		}else{ // XXX: Error
 			Log(Log::WarningMsg) << __func__ << " :: stanzaFlag & 1 -> true, but key isn't set! stanzaFlag: " << stanzaFlag;
 		}
@@ -71,6 +71,7 @@ Node BinTreeNodeReader::nextTreeInternal(const vector<char> & data){
 	token = this->read8(data);
 	if(this->isListTag(token)){
 		// XXX readList para los childresn!
+		this->readList(data, token, node);
 		return node;
 	}
 
@@ -79,7 +80,7 @@ Node BinTreeNodeReader::nextTreeInternal(const vector<char> & data){
 	return node;
 }
 
-void BinTreeNodeReader::readList(vector<char>&data, int token, Node &node){
+void BinTreeNodeReader::readList(const vector<char>&data, unsigned int token, Node &node){
 	int size = this->readListSize(data, token);
 
 	for(int i=0; i < size; i++){
@@ -135,7 +136,7 @@ vector<char> BinTreeNodeReader::readNibble(const vector<char>& data){
 
 	for(unsigned int i=0; i < nrOfNibbles; i++){
 		byte = data[i/2];
-		unsigned int shift = 4 * (1 - i %2);
+		unsigned int shift = 4 * (1 - i % 2);
 		unsigned int decimal = (byte & (15 << shift)) >> shift;
 		switch(decimal){
 			case 0:

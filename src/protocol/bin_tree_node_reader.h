@@ -45,7 +45,7 @@ namespace WhatsAcppi {
 				int readListSize(const std::vector<char> & data, int token);
 
 				bool isListTag(int token);
-				void readList(std::vector<char>&data, int token, Node &node);
+				void readList(const std::vector<char>&data, unsigned int token, Node &node);
 
 				void readAttributes(const std::vector<char>& data, int size, Node &node);
 

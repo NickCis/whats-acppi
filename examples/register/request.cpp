@@ -20,7 +20,7 @@ using WhatsAcppi::Util::sha1Str;
 int main(int argc, char*argv[]){
 	if(argc < 3){
 		cout << "Ussage:" << endl;
-		cout << "\t" << argv[0] << " PHONE_NUMBER USERNAME [METHOD: sms/voice] [CARRIER NAME]" << endl;
+		cout << "\t" << argv[0] << " PHONE_NUMBER USERNAME [METHOD: sms/voice] [CARRIER NAME] [MNC]" << endl;
 		return 0;
 	}
 
@@ -37,6 +37,9 @@ int main(int argc, char*argv[]){
 		phone.guessPhoneInformation(argv[4]);
 	else
 		phone.guessPhoneInformation();
+
+	if(argc > 5)
+		phone.setMnc(argv[5]);
 
 	#define PRINT(X) cout << #X << ": " << phone.get##X() << endl
 	PRINT(PhoneNumber);
@@ -56,7 +59,7 @@ int main(int argc, char*argv[]){
 
 	cout << "** Requesting code" << endl;
 
-	int ret = reg.codeRequest("voice");
+	int ret = reg.codeRequest(method);
 	if(ret < 0){
 		cout << "Error in http request! ret:" << ret << endl;
 		return -1;

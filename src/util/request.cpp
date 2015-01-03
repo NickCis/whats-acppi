@@ -102,20 +102,24 @@ void Request::setUrlParam(const string& name, const int& value){
 }
 
 int Request::get(){
-	stringstream ss;
 	int ret = 0;
 
-	ss << this->protocol << "://" << this->host << "?" << this->params.str();
 	#ifdef __USE_CURL__
 	if(this->me->slist)
 		curl_easy_setopt(this->me->curl, CURLOPT_HTTPHEADER, this->me->slist);
-	curl_easy_setopt(this->me->curl, CURLOPT_URL, ss.str().c_str());
+	curl_easy_setopt(this->me->curl, CURLOPT_URL, this->getUrl().c_str());
 	this->me->res = curl_easy_perform(this->me->curl);
 	if(this->me->res)
 		ret = -1;
 	#endif
 
 	return ret;
+}
+
+string Request::getUrl() const {
+	stringstream ss;
+	ss << this->protocol << "://" << this->host << "?" << this->params.str();
+	return ss.str();
 }
 
 const std::vector<char>& Request::getData() const{

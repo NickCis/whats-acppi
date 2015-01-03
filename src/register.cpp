@@ -46,8 +46,11 @@ int Register::codeRequest(const string& method){
 	req.setUrlParam("sim_mnc", this->phone.getMnc());
 	req.setUrlParam("method", method);
 	req.setUrlParam("token", req.urlEncode(this->generateRequestToken()));
-	req.setUrlParam("reson", req.urlEncode("self-send-jailbroken"));
+	req.setUrlParam("reason", req.urlEncode("self-send-jailbroken"));
 	req.setUrlParam("network_radio_type", "1");
+
+
+	Log() << __func__ << " :: url " << req.getUrl();
 
 	ret = req.get();
 

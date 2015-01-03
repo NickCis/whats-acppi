@@ -25,6 +25,7 @@ namespace WhatsAcppi {
 				std::string urlEncode(const char *data, size_t size);
 
 				const std::vector<char>& getData() const;
+				std::string getUrl() const;
 
 			protected:
 				class RequestInternal;
