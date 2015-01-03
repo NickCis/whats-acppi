@@ -135,7 +135,7 @@ vector<char> BinTreeNodeReader::readNibble(const vector<char>& data){
 	vector<char> ret;
 
 	for(unsigned int i=0; i < nrOfNibbles; i++){
-		byte = data[i/2];
+		byte = d[i/2];
 		unsigned int shift = 4 * (1 - i % 2);
 		unsigned int decimal = (byte & (15 << shift)) >> shift;
 		switch(decimal){
@@ -149,7 +149,7 @@ vector<char> BinTreeNodeReader::readNibble(const vector<char>& data){
 			case 7:
 			case 8:
 			case 9:
-				ret.push_back(decimal);
+				ret.push_back(decimal + '0');
 				break;
 			case 10:
 			case 11:
