@@ -74,16 +74,15 @@ void BinTreeNodeWriter::writeString(const string& tag){
 			this->writeToken(236);
 
 		this->writeToken(token);
-		return;
-	}
-
-	int atIndex = tag.find('@');
-	if (atIndex < 1){
-		this->writeBytes(tag);
 	}else{
-		string user = tag.substr(0, atIndex);
-		string server = tag.substr(atIndex);
-		this->writeJid(user, server);
+		int atIndex = tag.find('@');
+		if (atIndex < 1){
+			this->writeBytes(tag);
+		}else{
+			string user = tag.substr(0, atIndex);
+			string server = tag.substr(atIndex);
+			this->writeJid(user, server);
+		}
 	}
 }
 
@@ -199,6 +198,7 @@ void BinTreeNodeWriter::processBuffer(size_t headerPosition, KeyStream* crypto){
 	}
 
 	if (num3 > 0x1000000) { // TODO: error. Buffer too large
+		Log(Log::WarningMsg) << __func__ << " :: Buffer too large";
 	}
 
 	if(crypto){

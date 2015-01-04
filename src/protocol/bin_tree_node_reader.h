@@ -11,7 +11,7 @@ namespace WhatsAcppi {
 		class BinTreeNodeReader {
 			public:
 				BinTreeNodeReader();
-				Node nextTree(std::vector<char>& data, KeyStream* key);
+				Node nextTree(std::vector<char>& data, KeyStream* key=NULL);
 
 			protected:
 				Node nextTreeInternal(const std::vector<char> & data);

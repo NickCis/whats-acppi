@@ -486,7 +486,7 @@ int WhatsAcppi::Protocol::tryGetToken(const std::string& token, bool &secondary)
 
 	secondary = true;
 	for(i=0; secondaryStrings[i]; i++){
-		if(token == primaryStrings[i])
+		if(token == secondaryStrings[i])
 			return i;
 	}
 	return -1;
